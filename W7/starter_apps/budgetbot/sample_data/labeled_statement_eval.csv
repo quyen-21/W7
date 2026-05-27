@@ -1,0 +1,36 @@
+date,description,amount,expected_category
+2026-05-01,Highlands Coffee - Bui Vien,-65000,Food
+2026-05-02,T1908 GRAB CITY,-95000,Transport
+2026-05-03,GrabFood Nguyen Trai,-120000,Food
+2026-05-04,FT0024112501 ID:0001,-500000,Other
+2026-05-05,Netflix monthly subscription,-260000,Subscriptions
+2026-05-06,Salary deposit payroll,18500000,Income
+2026-05-07,Shopee order,-450000,Shopping
+2026-05-08,Lazada order,-780000,Shopping
+2026-05-09,Tiki electronics,-1250000,Shopping
+2026-05-10,EVN electricity bill,-520000,Utilities
+2026-05-11,VNPT fiber internet,-330000,Utilities
+2026-05-12,Viettel mobile data,-120000,Utilities
+2026-05-13,Be Taxi,-85000,Transport
+2026-05-14,Grab Bike,-70000,Transport
+2026-05-15,Shell Petrol,-300000,Transport
+2026-05-16,CGV cinema,-180000,Entertainment
+2026-05-17,Steam game purchase,-250000,Entertainment
+2026-05-18,Concert ticket My Tam,-900000,Entertainment
+2026-05-19,Pharmacity,-220000,Health
+2026-05-20,Medlatec test,-650000,Health
+2026-05-21,Guardian skincare,-350000,Health
+2026-05-22,Spotify Premium subscription,-59000,Subscriptions
+2026-05-23,YouTube Premium,-79000,Subscriptions
+2026-05-24,Apple iCloud 200GB,-69000,Subscriptions
+2026-05-25,Transfer to savings account,-2000000,Transfer
+2026-05-26,Transfer from family,1500000,Transfer
+2026-05-27,Cash withdrawal ATM,-1000000,Transfer
+2026-05-28,Vinmart HCM 04,-430000,Food
+2026-05-29,Unknown merchant POS,-370000,Other
+2026-05-30,MACBOOK PRO 14 SHOPEE,-45000000,Shopping
+2026-05-31,Co.opmart,-860000,Food
+2026-06-01,Pho 24,-70000,Food
+2026-06-02,Banh Mi Huynh Hoa,-45000,Food
+2026-06-03,Foreign exchange fee,-99000,Transfer
+2026-06-04,Bank fee monthly,-77000,Transfer
