@@ -5,207 +5,447 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>BudgetBot — AI Money Coach</title>
 <style>
+  /* ĐÃ SỬA: redesign toàn bộ giao diện theo phong cách financial dashboard hiện đại. */
   :root {
-    --accent: #059669;
-    --accent-light: #ecfdf5;
-    --accent-dark: #047857;
-    --bg: #f8fafc;
-    --card: #ffffff;
+    --bg: #eef6f2;
+    --bg-soft: #f8fafc;
+    --surface: #ffffff;
+    --surface-2: #f1f5f9;
     --text: #0f172a;
     --muted: #64748b;
-    --border: #e2e8f0;
-    --shadow: 0 1px 3px rgba(15, 23, 42, .08), 0 1px 2px rgba(15, 23, 42, .04);
-    --shadow-lg: 0 10px 30px -10px rgba(15, 23, 42, .15);
-    --radius: 12px;
-    --radius-sm: 8px;
-    --success: #059669;
-    --error: #dc2626;
-    --warn: #d97706;
+    --border: #dbe4ee;
+    --accent: #059669;
+    --accent-2: #10b981;
+    --accent-dark: #065f46;
+    --green-soft: #ecfdf5;
+    --red: #dc2626;
+    --red-soft: #fee2e2;
+    --amber: #d97706;
+    --amber-soft: #fef3c7;
+    --blue: #2563eb;
+    --blue-soft: #dbeafe;
+    --shadow: 0 18px 45px rgba(15, 23, 42, .10);
+    --shadow-sm: 0 8px 24px rgba(15, 23, 42, .08);
+    --radius-lg: 22px;
+    --radius: 16px;
+    --radius-sm: 11px;
   }
-  *, *::before, *::after { box-sizing: border-box; }
+
+  * { box-sizing: border-box; }
   html, body { margin: 0; padding: 0; }
   body {
-    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Inter, "Helvetica Neue", Arial, sans-serif;
-    font-size: 15px; line-height: 1.55;
-    color: var(--text); background: var(--bg); min-height: 100vh;
+    min-height: 100vh;
+    font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Arial, sans-serif;
+    color: var(--text);
+    background:
+      radial-gradient(circle at top left, rgba(16, 185, 129, .18), transparent 32rem),
+      radial-gradient(circle at top right, rgba(37, 99, 235, .12), transparent 28rem),
+      var(--bg);
   }
-  .topbar {
-    background: linear-gradient(135deg, var(--accent) 0%, var(--accent-dark) 100%);
-    color: white; padding: 1.25rem 2rem;
-    display: flex; align-items: center; justify-content: space-between;
-    gap: 2rem; flex-wrap: wrap; box-shadow: var(--shadow-lg);
+
+  .app-shell { max-width: 1180px; margin: 0 auto; padding: 1.35rem 1.2rem 3rem; }
+
+  .hero {
+    position: relative;
+    overflow: hidden;
+    border-radius: 28px;
+    padding: 1.4rem;
+    background: linear-gradient(135deg, #064e3b 0%, #059669 58%, #34d399 100%);
+    color: white;
+    box-shadow: var(--shadow);
   }
-  .brand { display: flex; align-items: center; gap: 0.9rem; }
-  .brand .logo { width: 44px; height: 44px; background: rgba(255,255,255,.18); border-radius: 10px; display: grid; place-items: center; font-size: 22px; }
-  .brand h1 { margin: 0; font-size: 1.15rem; font-weight: 600; letter-spacing: -.01em; }
-  .brand p { margin: 0; opacity: .85; font-size: 0.82rem; }
-  .status-pills { display: flex; gap: 0.4rem; flex-wrap: wrap; }
-  .pill { background: rgba(255,255,255,.15); padding: 0.25rem 0.6rem; border-radius: 100px; font-size: 0.72rem; font-family: ui-monospace, SFMono-Regular, Menlo, monospace; }
-  .pill.local { background: rgba(255,191,36,.25); }
-  .pill.remote { background: rgba(34,197,94,.35); }
-  .container { max-width: 1080px; margin: 0 auto; padding: 2rem 1.5rem 4rem; display: grid; gap: 1.25rem; }
-  .card { background: var(--card); border: 1px solid var(--border); border-radius: var(--radius); padding: 1.5rem; box-shadow: var(--shadow); }
-  .card-header { display: flex; align-items: baseline; justify-content: space-between; margin-bottom: 1rem; gap: 1rem; flex-wrap: wrap; }
-  .card-header h2 { margin: 0; font-size: 1.05rem; font-weight: 600; letter-spacing: -.01em; }
-  .card-header .step { background: var(--accent-light); color: var(--accent-dark); width: 26px; height: 26px; border-radius: 100px; display: inline-grid; place-items: center; font-size: 0.78rem; font-weight: 600; margin-right: 0.6rem; }
-  .card-header .meta { color: var(--muted); font-size: 0.82rem; }
-  .drop { border: 2px dashed var(--border); border-radius: var(--radius-sm); padding: 1.75rem 1rem; text-align: center; transition: all .15s ease; cursor: pointer; }
-  .drop:hover, .drop.dragover { border-color: var(--accent); background: var(--accent-light); }
-  .drop svg { width: 38px; height: 38px; color: var(--muted); margin-bottom: 0.5rem; }
-  .drop p { margin: 0.2rem 0; color: var(--muted); font-size: 0.92rem; }
-  .drop .browse { color: var(--accent); font-weight: 500; text-decoration: underline; }
+  .hero::after {
+    content: "";
+    position: absolute;
+    width: 380px;
+    height: 380px;
+    right: -120px;
+    top: -160px;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, .16);
+  }
+  .hero-content {
+    position: relative;
+    z-index: 1;
+    display: grid;
+    grid-template-columns: 1.4fr .9fr;
+    gap: 1.4rem;
+    align-items: center;
+  }
+  .brand-row { display: flex; align-items: center; gap: .85rem; margin-bottom: 1.2rem; }
+  .logo {
+    width: 48px;
+    height: 48px;
+    border-radius: 16px;
+    display: grid;
+    place-items: center;
+    background: rgba(255,255,255,.18);
+    box-shadow: inset 0 0 0 1px rgba(255,255,255,.18);
+    font-size: 1.55rem;
+  }
+  .brand-row h1 { margin: 0; font-size: 1.35rem; letter-spacing: -.02em; }
+  .brand-row p { margin: .1rem 0 0; opacity: .82; font-size: .9rem; }
+  .hero h2 { margin: 0; max-width: 690px; font-size: clamp(2rem, 4vw, 3.35rem); line-height: 1.02; letter-spacing: -.055em; }
+  .hero-subtitle { margin: 1rem 0 0; max-width: 620px; opacity: .9; font-size: 1rem; }
+  .hero-actions { display: flex; flex-wrap: wrap; gap: .7rem; margin-top: 1.25rem; }
+  .status-card {
+    position: relative;
+    z-index: 1;
+    background: rgba(255,255,255,.13);
+    border: 1px solid rgba(255,255,255,.24);
+    border-radius: 22px;
+    padding: 1rem;
+    backdrop-filter: blur(16px);
+  }
+  .status-card .title { font-size: .76rem; opacity: .78; text-transform: uppercase; letter-spacing: .08em; margin-bottom: .75rem; }
+  .status-pills { display: flex; gap: .5rem; flex-wrap: wrap; }
+  .pill {
+    display: inline-flex;
+    align-items: center;
+    gap: .35rem;
+    border-radius: 999px;
+    padding: .38rem .65rem;
+    background: rgba(255,255,255,.16);
+    color: white;
+    font-size: .76rem;
+    font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+    border: 1px solid rgba(255,255,255,.16);
+  }
+  .pill.local { background: rgba(251, 191, 36, .25); }
+  .pill.remote { background: rgba(16, 185, 129, .30); }
+
+  .quick-stats {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 1rem;
+    margin-top: 1.1rem;
+  }
+  .stat-card {
+    background: rgba(255,255,255,.88);
+    border: 1px solid rgba(255,255,255,.75);
+    border-radius: var(--radius);
+    padding: 1rem;
+    box-shadow: var(--shadow-sm);
+  }
+  .stat-card .label { font-size: .76rem; color: var(--muted); text-transform: uppercase; letter-spacing: .055em; }
+  .stat-card .value { margin-top: .25rem; font-size: 1.35rem; font-weight: 800; letter-spacing: -.03em; }
+  .stat-card .hint { color: var(--muted); font-size: .78rem; margin-top: .15rem; }
+
+  .dashboard {
+    display: grid;
+    grid-template-columns: minmax(0, .85fr) minmax(0, 1.25fr);
+    gap: 1.1rem;
+    margin-top: 1.1rem;
+    align-items: start;
+  }
+  .stack { display: grid; gap: 1.1rem; }
+  .card {
+    background: rgba(255,255,255,.92);
+    border: 1px solid rgba(219, 228, 238, .92);
+    border-radius: var(--radius-lg);
+    padding: 1.15rem;
+    box-shadow: var(--shadow-sm);
+  }
+  .card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 1rem;
+    margin-bottom: 1rem;
+  }
+  .card-title { display: flex; align-items: center; gap: .7rem; }
+  .step {
+    width: 32px;
+    height: 32px;
+    border-radius: 12px;
+    display: grid;
+    place-items: center;
+    background: var(--green-soft);
+    color: var(--accent-dark);
+    font-weight: 800;
+    font-size: .86rem;
+  }
+  h3 { margin: 0; font-size: 1.02rem; letter-spacing: -.02em; }
+  .meta { color: var(--muted); font-size: .82rem; margin-top: .12rem; }
+
+  .drop {
+    border: 1.5px dashed #a7c7bb;
+    border-radius: 20px;
+    padding: 1.35rem 1rem;
+    text-align: center;
+    background: linear-gradient(180deg, rgba(236,253,245,.7), rgba(255,255,255,.9));
+    transition: .18s ease;
+    cursor: pointer;
+  }
+  .drop:hover, .drop.dragover { border-color: var(--accent); transform: translateY(-1px); box-shadow: 0 12px 30px rgba(5,150,105,.13); }
+  .drop .upload-icon {
+    width: 54px;
+    height: 54px;
+    border-radius: 18px;
+    display: grid;
+    place-items: center;
+    margin: 0 auto .75rem;
+    background: white;
+    box-shadow: var(--shadow-sm);
+    font-size: 1.5rem;
+  }
+  .drop p { margin: .18rem 0; color: var(--muted); }
+  .drop strong { color: var(--text); }
+  .drop code { background: white; padding: .16rem .36rem; border-radius: 7px; color: var(--accent-dark); }
   .drop input { display: none; }
-  .input-row { display: flex; gap: 0.6rem; align-items: center; flex-wrap: wrap; }
-  input[type=text], input[type=month], input[type=number], select {
-    flex: 1; min-width: 160px; padding: 0.6rem 0.85rem;
-    border: 1px solid var(--border); border-radius: var(--radius-sm);
-    font: inherit; color: var(--text); background: white;
+
+  .input-row { display: grid; grid-template-columns: 1fr auto; gap: .65rem; align-items: center; }
+  .input-row.multi { grid-template-columns: 1fr 1fr 1fr auto auto; }
+  input, select {
+    width: 100%;
+    min-width: 0;
+    padding: .72rem .85rem;
+    border: 1px solid var(--border);
+    border-radius: 13px;
+    background: white;
+    color: var(--text);
+    font: inherit;
+    outline: none;
+    transition: .15s ease;
   }
-  input:focus, select:focus { outline: none; border-color: var(--accent); box-shadow: 0 0 0 3px rgba(5,150,105,.12); }
-  button { font: inherit; border: 0; border-radius: var(--radius-sm); padding: 0.6rem 1.1rem; cursor: pointer; font-weight: 500; transition: background .15s, transform .05s; }
-  button.primary { background: var(--accent); color: white; }
-  button.primary:hover { background: var(--accent-dark); }
-  button.primary:disabled { background: var(--muted); cursor: not-allowed; }
-  button.ghost { background: transparent; color: var(--accent); border: 1px solid var(--border); }
-  button.ghost:hover { background: var(--accent-light); border-color: var(--accent); }
+  input:focus, select:focus { border-color: var(--accent); box-shadow: 0 0 0 4px rgba(5,150,105,.10); }
 
-  .summary-totals { display: grid; grid-template-columns: repeat(4, 1fr); gap: 0.8rem; margin-bottom: 1rem; }
-  .total-tile { padding: 0.9rem 1rem; background: linear-gradient(180deg, var(--accent-light), white); border-radius: var(--radius-sm); border: 1px solid var(--border); }
-  .total-tile .label { color: var(--muted); font-size: 0.74rem; text-transform: uppercase; letter-spacing: .04em; }
-  .total-tile .value { font-size: 1.25rem; font-weight: 600; margin-top: 0.2rem; }
-  .total-tile.income .value { color: var(--accent); }
-  .total-tile.expense .value { color: var(--error); }
-  .total-tile.review .value { color: var(--warn); }
-  .chart { display: grid; gap: 0.5rem; margin-top: 0.5rem; }
-  .bar-row { display: grid; grid-template-columns: 130px 1fr 100px; align-items: center; gap: 0.6rem; font-size: 0.86rem; }
-  .bar-row .cat { font-weight: 500; }
-  .bar-row .track { height: 10px; background: var(--border); border-radius: 100px; overflow: hidden; }
-  .bar-row .fill { height: 100%; background: var(--accent); border-radius: 100px; transition: width .4s ease; }
-  .bar-row.expense .fill { background: #ef4444; }
-  .bar-row .amt { text-align: right; font-family: ui-monospace, Menlo, monospace; font-size: 0.82rem; color: var(--muted); }
+  button, .button-like {
+    border: 0;
+    border-radius: 13px;
+    padding: .73rem .95rem;
+    font: inherit;
+    font-weight: 700;
+    cursor: pointer;
+    transition: .15s ease;
+    white-space: nowrap;
+  }
+  .primary { background: var(--accent); color: white; box-shadow: 0 10px 22px rgba(5,150,105,.22); }
+  .primary:hover { background: var(--accent-dark); transform: translateY(-1px); }
+  .ghost { background: white; color: var(--accent-dark); border: 1px solid var(--border); }
+  .ghost:hover { background: var(--green-soft); border-color: #a7f3d0; }
+  .mini-btn { padding: .42rem .58rem; border-radius: 10px; font-size: .76rem; }
 
-  table { width: 100%; border-collapse: collapse; font-size: 0.84rem; }
-  th, td { text-align: left; padding: 0.5rem 0.65rem; border-bottom: 1px solid var(--border); vertical-align: top; }
-  th { color: var(--muted); font-weight: 500; font-size: 0.76rem; text-transform: uppercase; letter-spacing: .03em; }
-  td.amt { text-align: right; font-family: ui-monospace, Menlo, monospace; }
-  td.amt.neg { color: var(--error); }
+  .summary-totals {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: .75rem;
+    margin-bottom: 1rem;
+  }
+  .total-tile {
+    border-radius: 18px;
+    padding: .95rem;
+    border: 1px solid var(--border);
+    background: var(--surface);
+  }
+  .total-tile .label { color: var(--muted); font-size: .72rem; text-transform: uppercase; letter-spacing: .06em; }
+  .total-tile .value { font-size: 1.35rem; font-weight: 850; letter-spacing: -.04em; margin-top: .22rem; }
+  .income .value { color: var(--accent); }
+  .expense .value { color: var(--red); }
+  .review .value { color: var(--amber); }
+
+  .chart { display: grid; gap: .55rem; }
+  .bar-row { display: grid; grid-template-columns: 128px 1fr 92px; gap: .6rem; align-items: center; font-size: .85rem; }
+  .bar-row .cat { font-weight: 750; }
+  .bar-row .track { height: 12px; background: #e8eef5; border-radius: 999px; overflow: hidden; }
+  .bar-row .fill { height: 100%; background: linear-gradient(90deg, var(--accent), var(--accent-2)); border-radius: 999px; }
+  .bar-row.expense .fill { background: linear-gradient(90deg, #ef4444, #f97316); }
+  .bar-row .amt { text-align: right; font-family: ui-monospace, Menlo, monospace; color: var(--muted); font-size: .8rem; }
+
+  .table-wrap { overflow: auto; border: 1px solid var(--border); border-radius: 18px; background: white; }
+  table { width: 100%; border-collapse: collapse; min-width: 850px; font-size: .84rem; }
+  th, td { text-align: left; padding: .72rem .78rem; border-bottom: 1px solid #edf2f7; vertical-align: top; }
+  th { position: sticky; top: 0; z-index: 1; background: #f8fafc; color: var(--muted); font-weight: 800; font-size: .72rem; text-transform: uppercase; letter-spacing: .04em; }
+  tr:last-child td { border-bottom: 0; }
+  tr:hover td { background: #fbfefd; }
+  td.amt { text-align: right; font-family: ui-monospace, Menlo, monospace; font-weight: 800; }
+  td.amt.neg { color: var(--red); }
   td.amt.pos { color: var(--accent); }
-  .cat-pill, .conf-pill, .review-pill { display: inline-block; padding: 0.15rem 0.5rem; border-radius: 100px; font-size: 0.72rem; font-weight: 500; }
-  .cat-pill { background: var(--accent-light); color: var(--accent-dark); }
+
+  .cat-pill, .conf-pill, .review-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: .25rem;
+    border-radius: 999px;
+    padding: .21rem .55rem;
+    font-size: .72rem;
+    font-weight: 800;
+  }
+  .cat-pill { background: var(--green-soft); color: var(--accent-dark); }
   .conf-pill.high { background: #dcfce7; color: #166534; }
-  .conf-pill.medium { background: #fef3c7; color: #92400e; }
-  .conf-pill.low { background: #fee2e2; color: #991b1b; }
-  .review-pill { background: #fef3c7; color: #92400e; }
-  .reason { color: var(--muted); font-size: 0.76rem; margin-top: 0.2rem; }
-  .empty { text-align: center; color: var(--muted); padding: 1.5rem; font-size: 0.9rem; }
+  .conf-pill.medium { background: var(--amber-soft); color: #92400e; }
+  .conf-pill.low { background: var(--red-soft); color: #991b1b; }
+  .review-pill { background: var(--amber-soft); color: #92400e; margin-top: .25rem; }
+  .reason { color: var(--muted); font-size: .76rem; line-height: 1.4; }
+
+  .alert-card {
+    border-radius: 18px;
+    border: 1px solid var(--border);
+    padding: .9rem;
+    background: var(--surface);
+    display: grid;
+    gap: .5rem;
+  }
+  .alert-card.exceeded { border-color: #fecaca; background: linear-gradient(180deg, #fff7f7, white); }
+  .alert-card.ok { border-color: #bbf7d0; background: linear-gradient(180deg, #f0fdf4, white); }
+
+  .empty {
+    border-radius: 18px;
+    padding: 1.25rem;
+    color: var(--muted);
+    background: #f8fafc;
+    text-align: center;
+    border: 1px dashed var(--border);
+  }
   .muted { color: var(--muted); }
-  .spinner { display: inline-block; width: 14px; height: 14px; border: 2px solid var(--accent-light); border-top-color: var(--accent); border-radius: 50%; animation: spin .8s linear infinite; vertical-align: middle; }
+  .small { font-size: .8rem; }
+  .spinner { display: inline-block; width: 14px; height: 14px; border: 2px solid rgba(5,150,105,.18); border-top-color: var(--accent); border-radius: 50%; animation: spin .8s linear infinite; vertical-align: middle; }
   @keyframes spin { to { transform: rotate(360deg); } }
-  .toasts { position: fixed; top: 1rem; right: 1rem; z-index: 1000; display: grid; gap: 0.5rem; }
-  .toast { background: white; border: 1px solid var(--border); border-left: 3px solid var(--accent); border-radius: var(--radius-sm); padding: 0.7rem 1rem; box-shadow: var(--shadow-lg); min-width: 220px; max-width: 340px; font-size: 0.88rem; animation: slidein .25s ease-out; }
+
+  .toasts { position: fixed; top: 1rem; right: 1rem; z-index: 999; display: grid; gap: .55rem; }
+  .toast { background: white; border: 1px solid var(--border); border-left: 4px solid var(--accent); border-radius: 14px; padding: .8rem 1rem; box-shadow: var(--shadow); min-width: 230px; max-width: 360px; font-size: .88rem; animation: slidein .24s ease-out; }
   .toast.success { border-left-color: var(--success); }
-  .toast.error { border-left-color: var(--error); }
-  .toast.warn { border-left-color: var(--warn); }
-  @keyframes slidein { from { transform: translateX(120%); } to { transform: translateX(0); } }
-  details { font-size: 0.85rem; }
-  details > summary { cursor: pointer; color: var(--muted); padding: 0.3rem 0; }
-  details pre { background: #0f172a; color: #e2e8f0; padding: 0.8rem; border-radius: var(--radius-sm); font-size: 0.78rem; overflow: auto; max-height: 240px; font-family: ui-monospace, Menlo, monospace; }
-  @media (max-width: 760px) {
-    .topbar { padding: 1rem; }
-    .container { padding: 1rem; }
-    .summary-totals { grid-template-columns: 1fr; }
-    .bar-row { grid-template-columns: 100px 1fr 80px; }
+  .toast.error { border-left-color: var(--red); }
+  .toast.warn { border-left-color: var(--amber); }
+  @keyframes slidein { from { transform: translateX(110%); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
+
+  details { margin-top: 1.1rem; font-size: .86rem; }
+  details > summary { cursor: pointer; color: var(--muted); padding: .65rem .2rem; }
+  details pre { background: #0f172a; color: #e2e8f0; padding: 1rem; border-radius: 18px; font-size: .78rem; overflow: auto; max-height: 280px; font-family: ui-monospace, Menlo, monospace; }
+
+  @media (max-width: 930px) {
+    .hero-content, .dashboard { grid-template-columns: 1fr; }
+    .quick-stats, .summary-totals { grid-template-columns: repeat(2, 1fr); }
+    .input-row, .input-row.multi { grid-template-columns: 1fr; }
+  }
+  @media (max-width: 560px) {
+    .app-shell { padding: .85rem .75rem 2rem; }
+    .hero { border-radius: 22px; padding: 1rem; }
+    .quick-stats, .summary-totals { grid-template-columns: 1fr; }
+    .bar-row { grid-template-columns: 96px 1fr 76px; }
   }
 </style>
 </head>
 <body>
-
-<header class="topbar">
-  <div class="brand">
-    <span class="logo">💰</span>
-    <div>
-      <h1>BudgetBot</h1>
-      <p>AI Money Coach — upload statement, classify spending, review uncertain transactions</p>
+<div class="app-shell">
+  <section class="hero">
+    <div class="hero-content">
+      <div>
+        <div class="brand-row">
+          <div class="logo">💰</div>
+          <div>
+            <h1>BudgetBot</h1>
+            <p>AI Money Coach for monthly bank statements</p>
+          </div>
+        </div>
+        <h2>Understand where your money went.</h2>
+        <p class="hero-subtitle">Upload a CSV statement, let AI categorize transactions, then review uncertain rows and set category spending caps.</p>
+        <div class="hero-actions">
+          <button class="primary" onclick="document.getElementById('file').click()">Upload CSV</button>
+          <button class="ghost" onclick="summary(); loadTxns(); loadReview();">Refresh dashboard</button>
+        </div>
+      </div>
+      <div class="status-card">
+        <div class="title">Runtime status</div>
+        <div class="status-pills" id="status-pills">
+          <span class="pill"><span class="spinner"></span> loading...</span>
+        </div>
+        <p class="small" style="margin:.9rem 0 0; opacity:.82;">Demo focus: confidence scoring, review queue, budget cap alert.</p>
+      </div>
     </div>
-  </div>
-  <div class="status-pills" id="status-pills">
-    <span class="pill"><span class="spinner" style="border-color:rgba(255,255,255,.3);border-top-color:white;"></span> loading…</span>
-  </div>
-</header>
-
-<main class="container">
-
-  <section class="card">
-    <div class="card-header">
-      <h2><span class="step">1</span>Upload bank statement</h2>
-      <span class="meta">CSV: date,description,amount</span>
-    </div>
-    <label class="drop" id="drop">
-      <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
-        <path stroke-linecap="round" stroke-linejoin="round" d="M3 16.5v2.25A2.25 2.25 0 0 0 5.25 21h13.5A2.25 2.25 0 0 0 21 18.75V16.5M16.5 12 12 7.5m0 0L7.5 12M12 7.5v9"/>
-      </svg>
-      <p><strong>Drag a CSV here</strong> or <span class="browse">click to browse</span></p>
-      <p style="font-size:0.78rem;">Try <code>sample_data/bank_statement_q2_2026.csv</code></p>
-      <input type="file" id="file" accept=".csv,.txt">
-    </label>
-    <div id="upload-result"></div>
   </section>
 
-  <section class="card">
-    <div class="card-header">
-      <h2><span class="step">2</span>Spending summary</h2>
-      <span class="meta">Optional month filter</span>
-    </div>
-    <div class="input-row">
-      <input type="month" id="month" value="2026-05">
-      <button class="primary" id="sum-btn" onclick="summary()">Get summary</button>
-      <!-- ĐÃ SỬA: thêm nút load review queue theo tháng để chứng minh ambiguity handling. -->
-      <button class="ghost" onclick="loadReview()">Review queue</button>
-    </div>
-    <div id="summary-out" style="margin-top:1rem;"><div class="empty">Run a summary after uploading.</div></div>
+  <!-- ĐÃ SỬA: thêm KPI cards ở đầu trang để giao diện giống dashboard thật hơn. -->
+  <section class="quick-stats">
+    <div class="stat-card"><div class="label">Rows inserted</div><div class="value" id="kpi-rows">0</div><div class="hint">After upload</div></div>
+    <div class="stat-card"><div class="label">Need review</div><div class="value" id="kpi-review">0</div><div class="hint">Ambiguous rows</div></div>
+    <div class="stat-card"><div class="label">Month</div><div class="value" id="kpi-month">2026-05</div><div class="hint">Current filter</div></div>
+    <div class="stat-card"><div class="label">Alerts</div><div class="value" id="kpi-alerts">0</div><div class="hint">Budget status</div></div>
   </section>
 
-  <section class="card">
-    <div class="card-header">
-      <h2><span class="step">3</span>Budget cap alert</h2>
-      <span class="meta">Demo monthly cap</span>
+  <section class="dashboard">
+    <div class="stack">
+      <section class="card">
+        <div class="card-header">
+          <div class="card-title">
+            <span class="step">1</span>
+            <div><h3>Upload statement</h3><div class="meta">CSV format: date, description, amount</div></div>
+          </div>
+        </div>
+        <label class="drop" id="drop">
+          <div class="upload-icon">📄</div>
+          <p><strong>Drag a CSV here</strong> or <span style="color:var(--accent);font-weight:800;">click to browse</span></p>
+          <p class="small">Try <code>sample_data/bank_statement_q2_2026.csv</code></p>
+          <input type="file" id="file" accept=".csv,.txt">
+        </label>
+        <div id="upload-result" style="margin-top:.85rem;"></div>
+      </section>
+
+      <section class="card">
+        <div class="card-header">
+          <div class="card-title">
+            <span class="step">2</span>
+            <div><h3>Budget cap alert</h3><div class="meta">Set a monthly limit for a category</div></div>
+          </div>
+        </div>
+        <div class="input-row multi">
+          <input type="month" id="cap-month" value="2026-05">
+          <select id="cap-category">
+            <option>Food</option><option>Transport</option><option>Shopping</option><option>Subscriptions</option>
+            <option>Utilities</option><option>Entertainment</option><option>Health</option>
+          </select>
+          <input type="number" id="cap-amount" value="2000000" min="1">
+          <button class="primary" onclick="setCap()">Set cap</button>
+          <button class="ghost" onclick="loadAlerts()">Check</button>
+        </div>
+        <div id="alerts-out" style="margin-top:1rem;"><div class="empty">Set a cap, then check alerts.</div></div>
+      </section>
     </div>
-    <!-- ĐÃ SỬA: thêm form đặt cap để demo user story category alert. -->
-    <div class="input-row">
-      <input type="month" id="cap-month" value="2026-05">
-      <select id="cap-category">
-        <option>Food</option><option>Transport</option><option>Shopping</option><option>Subscriptions</option>
-        <option>Utilities</option><option>Entertainment</option><option>Health</option>
-      </select>
-      <input type="number" id="cap-amount" value="2000000" min="1">
-      <button class="primary" onclick="setCap()">Set cap</button>
-      <button class="ghost" onclick="loadAlerts()">Check alerts</button>
+
+    <div class="stack">
+      <section class="card">
+        <div class="card-header">
+          <div class="card-title">
+            <span class="step">3</span>
+            <div><h3>Spending summary</h3><div class="meta">Category breakdown and top cost drivers</div></div>
+          </div>
+          <div class="input-row" style="grid-template-columns: 170px auto auto; width:auto;">
+            <input type="month" id="month" value="2026-05" onchange="syncMonthKpi()">
+            <button class="primary" id="sum-btn" onclick="summary()">Summary</button>
+            <button class="ghost" onclick="loadReview()">Review</button>
+          </div>
+        </div>
+        <div id="summary-out"><div class="empty">Upload a statement, then run summary.</div></div>
+      </section>
+
+      <section class="card">
+        <div class="card-header">
+          <div class="card-title">
+            <span class="step">4</span>
+            <div><h3>Review queue</h3><div class="meta">Low-confidence or ambiguous transactions</div></div>
+          </div>
+        </div>
+        <div id="review-out"><div class="empty">Click Review after uploading.</div></div>
+      </section>
     </div>
-    <div id="alerts-out" style="margin-top:1rem;"><div class="empty">Set a monthly cap, then check alerts.</div></div>
   </section>
 
-  <section class="card">
+  <section class="card" style="margin-top:1.1rem;">
     <div class="card-header">
-      <h2><span class="step">4</span>All transactions</h2>
-      <button class="ghost" onclick="loadTxns()">Refresh</button>
+      <div class="card-title">
+        <span class="step">5</span>
+        <div><h3>All transactions</h3><div class="meta">Includes category, confidence, reason, and amount</div></div>
+      </div>
+      <button class="ghost" onclick="loadTxns()">Refresh table</button>
     </div>
     <div id="txns-out"><div class="empty">No transactions yet.</div></div>
   </section>
 
-  <section class="card">
-    <div class="card-header">
-      <h2><span class="step">5</span>Review queue</h2>
-      <span class="meta">Low-confidence or ambiguous</span>
-    </div>
-    <div id="review-out"><div class="empty">Click Review queue after uploading.</div></div>
-  </section>
-
   <details>
-    <summary>Raw API responses (debug)</summary>
+    <summary>Raw API responses for evidence</summary>
     <pre id="debug-log">No requests yet.</pre>
   </details>
-
-</main>
+</div>
 
 <div class="toasts" id="toasts"></div>
 
@@ -243,6 +483,8 @@ function logDebug(label, data) {
   const old = $('debug-log').textContent === 'No requests yet.' ? '' : $('debug-log').textContent;
   $('debug-log').textContent = `── ${new Date().toLocaleTimeString()} — ${label} ──\n${JSON.stringify(data, null, 2)}\n\n${old}`.slice(0, 5000);
 }
+function syncMonthKpi() { $('kpi-month').textContent = $('month').value || 'All'; }
+
 async function call(path, opts={}) {
   opts.headers = Object.assign({'X-User-Id': USER_ID}, opts.headers || {});
   const r = await fetch(API_BASE + path, opts);
@@ -251,9 +493,10 @@ async function call(path, opts={}) {
   logDebug(`${opts.method || 'GET'} ${path}`, body);
   return {ok: r.ok, status: r.status, body};
 }
+
 async function loadStatus() {
   const res = await call('/health');
-  if (!res.ok) { $('status-pills').innerHTML = '<span class="pill error">backend offline</span>'; return; }
+  if (!res.ok) { $('status-pills').innerHTML = '<span class="pill">backend offline</span>'; return; }
   $('status-pills').innerHTML = Object.entries(res.body.backends)
     .map(([k, v]) => `<span class="pill ${v === 'local' ? 'local' : 'remote'}">${escapeHtml(k)}: ${escapeHtml(v)}</span>`)
     .join('');
@@ -270,36 +513,40 @@ drop.addEventListener('drop', e => {
 fileInput.addEventListener('change', e => { if (e.target.files[0]) doUpload(e.target.files[0]); });
 
 async function doUpload(file) {
-  $('upload-result').innerHTML = `<p class="muted" style="margin:0.8rem 0 0;"><span class="spinner"></span> Categorizing ${escapeHtml(file.name)}…</p>`;
+  $('upload-result').innerHTML = `<div class="empty"><span class="spinner"></span> Categorizing ${escapeHtml(file.name)}...</div>`;
   const fd = new FormData(); fd.append('file', file);
   const res = await call('/upload', {method: 'POST', body: fd});
   if (!res.ok) {
     toast(`Upload failed: ${res.body.detail || res.status}`, 'error');
-    $('upload-result').innerHTML = `<p style="color:var(--error); margin:0.8rem 0 0;">${escapeHtml(res.body.detail || 'Upload failed')}</p>`;
+    $('upload-result').innerHTML = `<div class="empty" style="color:var(--red);">${escapeHtml(res.body.detail || 'Upload failed')}</div>`;
     return;
   }
   const b = res.body;
+  $('kpi-rows').textContent = b.rows_inserted || 0;
+  $('kpi-review').textContent = b.review_count || 0;
   $('upload-result').innerHTML = `
-    <div style="margin-top:0.8rem; padding:0.8rem; background:#f0fdf4; border-radius:var(--radius-sm); border-left:3px solid var(--success); font-size:0.88rem;">
-      ✓ <strong>${escapeHtml(b.filename)}</strong> — ${b.rows_inserted} of ${b.rows_parsed} rows inserted &amp; categorized<br>
-      <span class="muted">Review needed: ${b.review_count || 0} · Low confidence: ${b.low_confidence_count || 0}</span>
+    <div class="alert-card ok">
+      <strong>Upload complete</strong>
+      <span class="muted small">${escapeHtml(b.filename)} · ${b.rows_inserted} of ${b.rows_parsed} rows categorized</span>
+      <span class="muted small">Review needed: ${b.review_count || 0} · Low confidence: ${b.low_confidence_count || 0}</span>
     </div>`;
   toast(`Categorized ${b.rows_inserted} transactions`, 'success');
-  summary();
-  loadTxns();
-  loadReview();
+  await summary();
+  await loadTxns();
+  await loadReview();
 }
 
 // ---------- Summary ----------
 async function summary() {
+  syncMonthKpi();
   const m = $('month').value.trim();
   const url = '/summary' + (m ? '?month=' + encodeURIComponent(m) : '');
-  $('summary-out').innerHTML = '<div class="empty"><span class="spinner"></span> Loading…</div>';
+  $('summary-out').innerHTML = '<div class="empty"><span class="spinner"></span> Loading summary...</div>';
   const res = await call(url);
-  if (!res.ok) { $('summary-out').innerHTML = `<p style="color:var(--error);">${escapeHtml(res.body.detail || 'Error')}</p>`; return; }
+  if (!res.ok) { $('summary-out').innerHTML = `<div class="empty" style="color:var(--red);">${escapeHtml(res.body.detail || 'Error')}</div>`; return; }
   const {by_category, top_3_drivers} = res.body;
   if (!by_category || !Object.keys(by_category).length) {
-    $('summary-out').innerHTML = '<div class="empty">No data — upload a statement first.</div>';
+    $('summary-out').innerHTML = '<div class="empty">No data for this month.</div>';
     return;
   }
   const incomes = Object.entries(by_category).filter(([, v]) => v.total > 0);
@@ -308,6 +555,7 @@ async function summary() {
   const expenseTotal = expenses.reduce((s, [, v]) => s + Math.abs(v.total), 0);
   const reviewTotal = Object.values(by_category).reduce((s, v) => s + (v.review_count || 0), 0);
   const net = incomeTotal - expenseTotal;
+  $('kpi-review').textContent = reviewTotal;
   const maxBar = Math.max(...Object.values(by_category).map(v => Math.abs(v.total)), 1);
   const sorted = [...expenses.sort((a, b) => a[1].total - b[1].total), ...incomes.sort((a, b) => b[1].total - a[1].total)];
 
@@ -315,7 +563,7 @@ async function summary() {
     <div class="summary-totals">
       <div class="total-tile income"><div class="label">Income</div><div class="value">${fmtCompact(incomeTotal)}</div></div>
       <div class="total-tile expense"><div class="label">Expenses</div><div class="value">${fmtCompact(expenseTotal)}</div></div>
-      <div class="total-tile net"><div class="label">Net</div><div class="value" style="color:${net >= 0 ? 'var(--accent)' : 'var(--error)'};">${net >= 0 ? '+' : ''}${fmtCompact(net)}</div></div>
+      <div class="total-tile net"><div class="label">Net</div><div class="value" style="color:${net >= 0 ? 'var(--accent)' : 'var(--red)'};">${net >= 0 ? '+' : ''}${fmtCompact(net)}</div></div>
       <div class="total-tile review"><div class="label">Need review</div><div class="value">${reviewTotal}</div></div>
     </div>
     <div class="chart">
@@ -323,16 +571,14 @@ async function summary() {
         const pct = Math.round(Math.abs(v.total) / maxBar * 100);
         const cls = v.total >= 0 ? 'income' : 'expense';
         return `<div class="bar-row ${cls}">
-          <div class="cat">${escapeHtml(cat)} <span class="muted" style="font-size:.78rem;">(${v.count})</span></div>
+          <div class="cat">${escapeHtml(cat)} <span class="muted small">(${v.count})</span></div>
           <div class="track"><div class="fill" style="width:${pct}%"></div></div>
           <div class="amt">${v.total >= 0 ? '+' : ''}${fmtCompact(v.total)}</div>
         </div>`;
       }).join('')}
     </div>
     ${top_3_drivers && top_3_drivers.length ? `
-      <p class="muted" style="font-size:0.82rem; margin-top:1rem;">
-        🎯 Top drivers: ${top_3_drivers.map(d => `<strong>${escapeHtml(d.category)}</strong> (${fmtCompact(d.total)})`).join(', ')}
-      </p>` : ''}
+      <p class="muted small" style="margin:1rem 0 0;">Top drivers: ${top_3_drivers.map(d => `<strong>${escapeHtml(d.category)}</strong> (${fmtCompact(d.total)})`).join(', ')}</p>` : ''}
   `;
 }
 
@@ -340,29 +586,30 @@ function renderTransactions(rows, opts={}) {
   if (!rows || !rows.length) return '<div class="empty">No transactions found.</div>';
   const showCorrect = opts.showCorrect;
   return `
-    <table>
-      <thead><tr><th>Date</th><th>Description</th><th>Category</th><th>Confidence</th><th>Reason</th><th style="text-align:right;">Amount</th>${showCorrect ? '<th>Correct</th>' : ''}</tr></thead>
-      <tbody>
-        ${rows.slice(0, 60).map(r => `
-          <tr>
-            <td>${escapeHtml(r.date)}</td>
-            <td>${escapeHtml((r.description || '').slice(0, 70))}${r.needs_review ? '<br><span class="review-pill">needs review</span>' : ''}</td>
-            <td><span class="cat-pill">${escapeHtml(r.category)}</span></td>
-            <td><span class="conf-pill ${escapeHtml(r.confidence || 'medium')}">${escapeHtml(r.confidence || '')} · ${Math.round((r.confidence_score || 0) * 100)}%</span></td>
-            <td><div class="reason">${escapeHtml(r.reason || '')}<br>${r.suggested_categories && r.suggested_categories.length ? 'Suggested: ' + escapeHtml(r.suggested_categories.join(', ')) : ''}</div></td>
-            <td class="amt ${r.amount < 0 ? 'neg' : 'pos'}">${r.amount >= 0 ? '+' : ''}${fmt(r.amount)}</td>
-            ${showCorrect ? `<td><button class="ghost" onclick="correctTxn('${escapeHtml(r.transaction_id)}')">Mark Other</button></td>` : ''}
-          </tr>
-        `).join('')}
-      </tbody>
-    </table>
-    ${rows.length > 60 ? `<p class="muted" style="font-size:0.78rem; margin-top:0.5rem;">Showing 60 of ${rows.length}</p>` : ''}
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Date</th><th>Description</th><th>Category</th><th>Confidence</th><th>Reason</th><th style="text-align:right;">Amount</th>${showCorrect ? '<th>Correct</th>' : ''}</tr></thead>
+        <tbody>
+          ${rows.slice(0, 60).map(r => `
+            <tr>
+              <td>${escapeHtml(r.date)}</td>
+              <td><strong>${escapeHtml((r.description || '').slice(0, 70))}</strong>${r.needs_review ? '<br><span class="review-pill">needs review</span>' : ''}</td>
+              <td><span class="cat-pill">${escapeHtml(r.category)}</span></td>
+              <td><span class="conf-pill ${escapeHtml(r.confidence || 'medium')}">${escapeHtml(r.confidence || '')} · ${Math.round((r.confidence_score || 0) * 100)}%</span></td>
+              <td><div class="reason">${escapeHtml(r.reason || '')}<br>${r.suggested_categories && r.suggested_categories.length ? 'Suggested: ' + escapeHtml(r.suggested_categories.join(', ')) : ''}</div></td>
+              <td class="amt ${r.amount < 0 ? 'neg' : 'pos'}">${r.amount >= 0 ? '+' : ''}${fmt(r.amount)}</td>
+              ${showCorrect ? `<td><button class="ghost mini-btn" onclick="correctTxn('${escapeHtml(r.transaction_id)}')">Mark Other</button></td>` : ''}
+            </tr>
+          `).join('')}
+        </tbody>
+      </table>
+    </div>
+    ${rows.length > 60 ? `<p class="muted small" style="margin-top:.6rem;">Showing 60 of ${rows.length}</p>` : ''}
   `;
 }
 
-// ---------- Transactions ----------
 async function loadTxns() {
-  $('txns-out').innerHTML = '<div class="empty"><span class="spinner"></span> Loading…</div>';
+  $('txns-out').innerHTML = '<div class="empty"><span class="spinner"></span> Loading transactions...</div>';
   const m = $('month').value.trim();
   const url = '/transactions' + (m ? '?month=' + encodeURIComponent(m) : '');
   const res = await call(url);
@@ -373,17 +620,16 @@ async function loadTxns() {
   $('txns-out').innerHTML = renderTransactions(res.body.transactions);
 }
 
-// ĐÃ SỬA: review queue gọi API /review để hiển thị giao dịch mơ hồ/low confidence.
 async function loadReview() {
-  $('review-out').innerHTML = '<div class="empty"><span class="spinner"></span> Loading review queue…</div>';
+  $('review-out').innerHTML = '<div class="empty"><span class="spinner"></span> Loading review queue...</div>';
   const m = $('month').value.trim();
   const url = '/review' + (m ? '?month=' + encodeURIComponent(m) : '');
   const res = await call(url);
-  if (!res.ok) { $('review-out').innerHTML = `<p style="color:var(--error);">${escapeHtml(res.body.detail || 'Error')}</p>`; return; }
-  $('review-out').innerHTML = `<p class="muted">${res.body.count || 0} transaction(s) need review.</p>` + renderTransactions(res.body.transactions, {showCorrect: true});
+  if (!res.ok) { $('review-out').innerHTML = `<div class="empty" style="color:var(--red);">${escapeHtml(res.body.detail || 'Error')}</div>`; return; }
+  $('kpi-review').textContent = res.body.count || 0;
+  $('review-out').innerHTML = `<p class="muted small" style="margin-top:0;">${res.body.count || 0} transaction(s) need review.</p>` + renderTransactions(res.body.transactions, {showCorrect: true});
 }
 
-// ĐÃ SỬA: demo user correction bằng cách mark category Other cho item mơ hồ.
 async function correctTxn(transactionId) {
   const res = await call(`/transactions/${transactionId}/correct`, {
     method: 'POST',
@@ -392,10 +638,9 @@ async function correctTxn(transactionId) {
   });
   if (!res.ok || !res.body.updated) { toast('Correction failed', 'error'); return; }
   toast('Transaction corrected', 'success');
-  loadReview(); loadTxns(); summary();
+  await loadReview(); await loadTxns(); await summary();
 }
 
-// ĐÃ SỬA: set cap và check alerts dùng API mới.
 async function setCap() {
   const payload = {
     month: $('cap-month').value,
@@ -409,33 +654,31 @@ async function setCap() {
   });
   if (!res.ok || !res.body.saved) { toast(res.body.reason || 'Could not save cap', 'error'); return; }
   toast('Budget cap saved', 'success');
-  loadAlerts();
+  await loadAlerts();
 }
 
 async function loadAlerts() {
   const m = $('cap-month').value.trim();
   const res = await call('/budget/alerts?month=' + encodeURIComponent(m));
-  if (!res.ok) { $('alerts-out').innerHTML = `<p style="color:var(--error);">${escapeHtml(res.body.detail || 'Error')}</p>`; return; }
+  if (!res.ok) { $('alerts-out').innerHTML = `<div class="empty" style="color:var(--red);">${escapeHtml(res.body.detail || 'Error')}</div>`; return; }
   const alerts = res.body.alerts || [];
+  $('kpi-alerts').textContent = alerts.filter(a => a.status === 'exceeded').length;
   if (!alerts.length) { $('alerts-out').innerHTML = '<div class="empty">No caps saved for this month.</div>'; return; }
-  $('alerts-out').innerHTML = `
-    <table>
-      <thead><tr><th>Category</th><th>Cap</th><th>Actual spend</th><th>Status</th><th>Exceeded by</th></tr></thead>
-      <tbody>
-        ${alerts.map(a => `
-          <tr>
-            <td><span class="cat-pill">${escapeHtml(a.category)}</span></td>
-            <td>${fmt(a.cap_amount)}</td>
-            <td>${fmt(a.actual_spend)}</td>
-            <td>${a.status === 'exceeded' ? '<span class="review-pill">exceeded</span>' : '<span class="conf-pill high">ok</span>'}</td>
-            <td>${fmt(a.exceeded_by)}</td>
-          </tr>
-        `).join('')}
-      </tbody>
-    </table>`;
+  $('alerts-out').innerHTML = `<div class="stack" style="gap:.65rem;">
+    ${alerts.map(a => `
+      <div class="alert-card ${a.status === 'exceeded' ? 'exceeded' : 'ok'}">
+        <div style="display:flex;justify-content:space-between;gap:.8rem;align-items:center;">
+          <strong>${escapeHtml(a.category)}</strong>
+          ${a.status === 'exceeded' ? '<span class="review-pill">exceeded</span>' : '<span class="conf-pill high">ok</span>'}
+        </div>
+        <div class="small muted">Cap: ${fmt(a.cap_amount)} · Actual: ${fmt(a.actual_spend)} · Exceeded by: ${fmt(a.exceeded_by)}</div>
+      </div>
+    `).join('')}
+  </div>`;
 }
 
 loadStatus();
+syncMonthKpi();
 </script>
 </body>
 </html>
