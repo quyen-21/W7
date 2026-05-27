@@ -5,30 +5,38 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>BudgetBot — AI Money Coach</title>
 <style>
-  /* ĐÃ SỬA: redesign toàn bộ giao diện theo phong cách financial dashboard hiện đại. */
+  /* ĐÃ SỬA: nâng cấp UI thành premium SaaS dashboard sinh động hơn, có animation và visual finance cards. */
   :root {
-    --bg: #eef6f2;
-    --bg-soft: #f8fafc;
-    --surface: #ffffff;
-    --surface-2: #f1f5f9;
+    --bg: #06141f;
+    --bg-2: #092235;
+    --surface: rgba(255, 255, 255, .92);
+    --surface-soft: rgba(248, 250, 252, .78);
+    --glass: rgba(255, 255, 255, .14);
+    --glass-border: rgba(255, 255, 255, .22);
     --text: #0f172a;
+    --text-on-dark: #f8fafc;
     --muted: #64748b;
-    --border: #dbe4ee;
-    --accent: #059669;
-    --accent-2: #10b981;
-    --accent-dark: #065f46;
-    --green-soft: #ecfdf5;
-    --red: #dc2626;
-    --red-soft: #fee2e2;
-    --amber: #d97706;
-    --amber-soft: #fef3c7;
+    --muted-on-dark: rgba(248, 250, 252, .72);
+    --border: #dbe5ef;
+    --accent: #10b981;
+    --accent-2: #22c55e;
+    --accent-dark: #047857;
+    --cyan: #38bdf8;
     --blue: #2563eb;
+    --purple: #8b5cf6;
+    --red: #ef4444;
+    --amber: #f59e0b;
+    --green-soft: #ecfdf5;
+    --red-soft: #fee2e2;
+    --amber-soft: #fef3c7;
     --blue-soft: #dbeafe;
-    --shadow: 0 18px 45px rgba(15, 23, 42, .10);
-    --shadow-sm: 0 8px 24px rgba(15, 23, 42, .08);
-    --radius-lg: 22px;
-    --radius: 16px;
-    --radius-sm: 11px;
+    --shadow-xl: 0 28px 70px rgba(0, 0, 0, .28);
+    --shadow: 0 18px 45px rgba(15, 23, 42, .14);
+    --shadow-sm: 0 10px 25px rgba(15, 23, 42, .09);
+    --radius-xl: 30px;
+    --radius-lg: 24px;
+    --radius: 18px;
+    --radius-sm: 13px;
   }
 
   * { box-sizing: border-box; }
@@ -38,73 +46,342 @@
     font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Arial, sans-serif;
     color: var(--text);
     background:
-      radial-gradient(circle at top left, rgba(16, 185, 129, .18), transparent 32rem),
-      radial-gradient(circle at top right, rgba(37, 99, 235, .12), transparent 28rem),
-      var(--bg);
+      radial-gradient(circle at 8% 10%, rgba(16, 185, 129, .35), transparent 26rem),
+      radial-gradient(circle at 86% 6%, rgba(56, 189, 248, .22), transparent 28rem),
+      linear-gradient(180deg, var(--bg) 0%, var(--bg-2) 42%, #eef6f2 42%, #f8fafc 100%);
+    overflow-x: hidden;
+  }
+  body::before {
+    content: "";
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+    background-image:
+      linear-gradient(rgba(255,255,255,.035) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(255,255,255,.035) 1px, transparent 1px);
+    background-size: 54px 54px;
+    mask-image: linear-gradient(180deg, black, transparent 66%);
   }
 
-  .app-shell { max-width: 1180px; margin: 0 auto; padding: 1.35rem 1.2rem 3rem; }
+  .orb {
+    position: fixed;
+    border-radius: 50%;
+    filter: blur(34px);
+    opacity: .55;
+    pointer-events: none;
+    animation: float 8s ease-in-out infinite;
+  }
+  .orb.one { width: 240px; height: 240px; left: -80px; top: 120px; background: rgba(16, 185, 129, .45); }
+  .orb.two { width: 260px; height: 260px; right: -90px; top: 40px; background: rgba(56, 189, 248, .35); animation-delay: -2.5s; }
+  .orb.three { width: 190px; height: 190px; right: 22%; top: 310px; background: rgba(139, 92, 246, .22); animation-delay: -4s; }
+  @keyframes float { 0%, 100% { transform: translateY(0) scale(1); } 50% { transform: translateY(18px) scale(1.03); } }
+
+  .app-shell {
+    position: relative;
+    z-index: 1;
+    max-width: 1240px;
+    margin: 0 auto;
+    padding: 1.3rem 1.1rem 3.5rem;
+  }
+
+  .nav {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 1rem;
+    margin-bottom: 1.15rem;
+    color: var(--text-on-dark);
+  }
+  .brand { display: flex; align-items: center; gap: .78rem; }
+  .logo {
+    width: 47px;
+    height: 47px;
+    border-radius: 17px;
+    display: grid;
+    place-items: center;
+    background: linear-gradient(135deg, rgba(255,255,255,.22), rgba(255,255,255,.08));
+    box-shadow: inset 0 0 0 1px rgba(255,255,255,.20), 0 14px 34px rgba(0,0,0,.18);
+    font-size: 1.45rem;
+  }
+  .brand h1 { margin: 0; font-size: 1.15rem; letter-spacing: -.025em; }
+  .brand p { margin: .1rem 0 0; font-size: .78rem; color: var(--muted-on-dark); }
+  .nav-actions { display: flex; align-items: center; gap: .55rem; flex-wrap: wrap; }
+  .chip {
+    display: inline-flex;
+    align-items: center;
+    gap: .35rem;
+    padding: .45rem .7rem;
+    border-radius: 999px;
+    color: var(--text-on-dark);
+    border: 1px solid rgba(255,255,255,.18);
+    background: rgba(255,255,255,.10);
+    backdrop-filter: blur(16px);
+    font-size: .78rem;
+    font-weight: 700;
+  }
 
   .hero {
     position: relative;
     overflow: hidden;
-    border-radius: 28px;
-    padding: 1.4rem;
-    background: linear-gradient(135deg, #064e3b 0%, #059669 58%, #34d399 100%);
-    color: white;
-    box-shadow: var(--shadow);
+    border-radius: var(--radius-xl);
+    padding: 1.3rem;
+    color: var(--text-on-dark);
+    background: linear-gradient(135deg, rgba(255,255,255,.16), rgba(255,255,255,.07));
+    border: 1px solid rgba(255,255,255,.18);
+    box-shadow: var(--shadow-xl);
+    backdrop-filter: blur(22px);
   }
   .hero::after {
     content: "";
     position: absolute;
-    width: 380px;
-    height: 380px;
-    right: -120px;
-    top: -160px;
+    width: 620px;
+    height: 620px;
+    right: -230px;
+    top: -320px;
     border-radius: 50%;
-    background: rgba(255, 255, 255, .16);
+    background: radial-gradient(circle, rgba(255,255,255,.22), transparent 62%);
   }
-  .hero-content {
+  .hero-grid {
     position: relative;
     z-index: 1;
     display: grid;
-    grid-template-columns: 1.4fr .9fr;
-    gap: 1.4rem;
-    align-items: center;
+    grid-template-columns: minmax(0, 1.06fr) minmax(360px, .82fr);
+    gap: 1.35rem;
+    align-items: stretch;
   }
-  .brand-row { display: flex; align-items: center; gap: .85rem; margin-bottom: 1.2rem; }
-  .logo {
-    width: 48px;
-    height: 48px;
+  .hero-copy {
+    padding: 1.15rem 1rem 1rem;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+  }
+  .eyebrow {
+    width: fit-content;
+    display: inline-flex;
+    align-items: center;
+    gap: .4rem;
+    padding: .45rem .72rem;
+    border-radius: 999px;
+    background: rgba(16,185,129,.18);
+    border: 1px solid rgba(167,243,208,.26);
+    color: #d1fae5;
+    font-weight: 800;
+    font-size: .78rem;
+    margin-bottom: 1rem;
+  }
+  .hero h2 {
+    margin: 0;
+    max-width: 700px;
+    font-size: clamp(2.3rem, 5vw, 4.25rem);
+    line-height: .96;
+    letter-spacing: -.07em;
+  }
+  .gradient-text {
+    color: transparent;
+    background: linear-gradient(90deg, #a7f3d0, #67e8f9, #ffffff);
+    -webkit-background-clip: text;
+    background-clip: text;
+  }
+  .hero-subtitle {
+    margin: 1.05rem 0 0;
+    max-width: 640px;
+    color: var(--muted-on-dark);
+    font-size: 1rem;
+    line-height: 1.65;
+  }
+  .hero-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: .75rem;
+    margin-top: 1.3rem;
+  }
+
+  .button {
+    border: 0;
     border-radius: 16px;
+    padding: .82rem 1.05rem;
+    font: inherit;
+    font-weight: 850;
+    cursor: pointer;
+    transition: transform .16s ease, box-shadow .16s ease, background .16s ease;
+    white-space: nowrap;
+  }
+  .button:hover { transform: translateY(-2px); }
+  .button.primary {
+    color: #052e2b;
+    background: linear-gradient(135deg, #a7f3d0, #34d399 54%, #22c55e);
+    box-shadow: 0 18px 36px rgba(16,185,129,.28);
+  }
+  .button.ghost {
+    color: var(--text-on-dark);
+    background: rgba(255,255,255,.12);
+    border: 1px solid rgba(255,255,255,.20);
+  }
+  .button.soft {
+    color: var(--accent-dark);
+    background: white;
+    border: 1px solid var(--border);
+    box-shadow: var(--shadow-sm);
+  }
+  .button.soft:hover { background: var(--green-soft); }
+  .button.small { padding: .46rem .7rem; border-radius: 11px; font-size: .77rem; }
+
+  .insight-panel {
+    position: relative;
+    min-height: 420px;
+    border-radius: 28px;
+    padding: 1rem;
+    background: rgba(255,255,255,.92);
+    border: 1px solid rgba(255,255,255,.78);
+    color: var(--text);
+    box-shadow: 0 22px 55px rgba(0,0,0,.22);
+    overflow: hidden;
+  }
+  .insight-panel::before {
+    content: "";
+    position: absolute;
+    inset: -90px -90px auto auto;
+    width: 250px;
+    height: 250px;
+    border-radius: 50%;
+    background: rgba(16,185,129,.18);
+  }
+  .panel-top {
+    position: relative;
+    z-index: 1;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: .8rem;
+    margin-bottom: .9rem;
+  }
+  .panel-title { font-weight: 900; letter-spacing: -.03em; }
+  .ai-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: .35rem;
+    border-radius: 999px;
+    padding: .34rem .62rem;
+    background: #ecfeff;
+    color: #155e75;
+    border: 1px solid #bae6fd;
+    font-size: .72rem;
+    font-weight: 850;
+  }
+  .mini-visuals {
+    position: relative;
+    z-index: 1;
+    display: grid;
+    grid-template-columns: .9fr 1.1fr;
+    gap: .8rem;
+  }
+  .donut-card, .ai-card, .finance-card {
+    border: 1px solid var(--border);
+    background: white;
+    border-radius: 22px;
+    padding: .9rem;
+    box-shadow: var(--shadow-sm);
+  }
+  .donut {
+    width: 128px;
+    height: 128px;
+    margin: .35rem auto .65rem;
+    border-radius: 50%;
+    background: conic-gradient(#10b981 0 42%, #38bdf8 42% 63%, #f59e0b 63% 80%, #ef4444 80% 100%);
     display: grid;
     place-items: center;
-    background: rgba(255,255,255,.18);
-    box-shadow: inset 0 0 0 1px rgba(255,255,255,.18);
-    font-size: 1.55rem;
+    box-shadow: inset 0 0 0 1px rgba(0,0,0,.04);
   }
-  .brand-row h1 { margin: 0; font-size: 1.35rem; letter-spacing: -.02em; }
-  .brand-row p { margin: .1rem 0 0; opacity: .82; font-size: .9rem; }
-  .hero h2 { margin: 0; max-width: 690px; font-size: clamp(2rem, 4vw, 3.35rem); line-height: 1.02; letter-spacing: -.055em; }
-  .hero-subtitle { margin: 1rem 0 0; max-width: 620px; opacity: .9; font-size: 1rem; }
-  .hero-actions { display: flex; flex-wrap: wrap; gap: .7rem; margin-top: 1.25rem; }
-  .status-card {
-    position: relative;
-    z-index: 1;
-    background: rgba(255,255,255,.13);
-    border: 1px solid rgba(255,255,255,.24);
-    border-radius: 22px;
-    padding: 1rem;
-    backdrop-filter: blur(16px);
+  .donut::after {
+    content: "AI";
+    width: 72px;
+    height: 72px;
+    border-radius: 50%;
+    background: white;
+    display: grid;
+    place-items: center;
+    font-weight: 950;
+    color: var(--accent-dark);
+    box-shadow: inset 0 0 0 1px var(--border);
   }
-  .status-card .title { font-size: .76rem; opacity: .78; text-transform: uppercase; letter-spacing: .08em; margin-bottom: .75rem; }
-  .status-pills { display: flex; gap: .5rem; flex-wrap: wrap; }
+  .legend { display: grid; gap: .38rem; font-size: .78rem; color: var(--muted); }
+  .legend-row { display: flex; justify-content: space-between; gap: .6rem; }
+  .dot { width: .58rem; height: .58rem; border-radius: 50%; display: inline-block; margin-right: .35rem; }
+  .dot.food { background: #10b981; }
+  .dot.transport { background: #38bdf8; }
+  .dot.sub { background: #f59e0b; }
+  .dot.review { background: #ef4444; }
+
+  .ai-card {
+    display: grid;
+    gap: .7rem;
+  }
+  .insight-line {
+    display: flex;
+    justify-content: space-between;
+    gap: .75rem;
+    align-items: center;
+    padding: .7rem;
+    border-radius: 16px;
+    background: #f8fafc;
+  }
+  .insight-line strong { font-size: .86rem; }
+  .score-ring {
+    --score: 80;
+    min-width: 46px;
+    height: 46px;
+    border-radius: 50%;
+    background: conic-gradient(var(--accent) calc(var(--score) * 1%), #e2e8f0 0);
+    display: grid;
+    place-items: center;
+    font-size: .7rem;
+    font-weight: 950;
+  }
+  .score-ring::before {
+    content: attr(data-label);
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    background: white;
+    display: grid;
+    place-items: center;
+  }
+  .finance-card {
+    position: absolute;
+    left: 1rem;
+    right: 1rem;
+    bottom: 1rem;
+    display: grid;
+    grid-template-columns: 1fr auto;
+    gap: .8rem;
+    align-items: center;
+    background: linear-gradient(135deg, #052e2b, #064e3b);
+    color: white;
+    border: 1px solid rgba(255,255,255,.12);
+  }
+  .card-number { font-family: ui-monospace, Menlo, monospace; opacity: .75; font-size: .78rem; margin-top: .35rem; }
+  .pulse-dot {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    background: #34d399;
+    box-shadow: 0 0 0 0 rgba(52,211,153,.58);
+    animation: pulse 1.6s infinite;
+  }
+  @keyframes pulse { 0% { box-shadow: 0 0 0 0 rgba(52,211,153,.58); } 70% { box-shadow: 0 0 0 12px rgba(52,211,153,0); } 100% { box-shadow: 0 0 0 0 rgba(52,211,153,0); } }
+
+  .status-row {
+    display: flex;
+    gap: .5rem;
+    flex-wrap: wrap;
+    margin-top: 1rem;
+  }
   .pill {
     display: inline-flex;
     align-items: center;
     gap: .35rem;
     border-radius: 999px;
-    padding: .38rem .65rem;
+    padding: .4rem .68rem;
     background: rgba(255,255,255,.16);
     color: white;
     font-size: .76rem;
@@ -114,37 +391,58 @@
   .pill.local { background: rgba(251, 191, 36, .25); }
   .pill.remote { background: rgba(16, 185, 129, .30); }
 
-  .quick-stats {
+  .kpi-grid {
     display: grid;
     grid-template-columns: repeat(4, 1fr);
     gap: 1rem;
-    margin-top: 1.1rem;
+    margin-top: 1rem;
   }
-  .stat-card {
-    background: rgba(255,255,255,.88);
-    border: 1px solid rgba(255,255,255,.75);
-    border-radius: var(--radius);
+  .kpi {
+    position: relative;
+    overflow: hidden;
+    background: var(--surface);
+    border: 1px solid rgba(255,255,255,.85);
+    border-radius: var(--radius-lg);
     padding: 1rem;
-    box-shadow: var(--shadow-sm);
+    box-shadow: var(--shadow);
   }
-  .stat-card .label { font-size: .76rem; color: var(--muted); text-transform: uppercase; letter-spacing: .055em; }
-  .stat-card .value { margin-top: .25rem; font-size: 1.35rem; font-weight: 800; letter-spacing: -.03em; }
-  .stat-card .hint { color: var(--muted); font-size: .78rem; margin-top: .15rem; }
+  .kpi::after {
+    content: "";
+    position: absolute;
+    right: -28px;
+    top: -28px;
+    width: 78px;
+    height: 78px;
+    border-radius: 50%;
+    background: rgba(16,185,129,.10);
+  }
+  .kpi-icon {
+    width: 39px;
+    height: 39px;
+    border-radius: 14px;
+    display: grid;
+    place-items: center;
+    background: var(--green-soft);
+    margin-bottom: .75rem;
+  }
+  .kpi .label { color: var(--muted); font-size: .75rem; text-transform: uppercase; letter-spacing: .06em; font-weight: 850; }
+  .kpi .value { font-size: 1.55rem; font-weight: 950; letter-spacing: -.055em; margin-top: .15rem; }
+  .kpi .hint { color: var(--muted); font-size: .78rem; margin-top: .18rem; }
 
   .dashboard {
     display: grid;
-    grid-template-columns: minmax(0, .85fr) minmax(0, 1.25fr);
-    gap: 1.1rem;
-    margin-top: 1.1rem;
+    grid-template-columns: minmax(330px, .82fr) minmax(0, 1.24fr);
+    gap: 1rem;
+    margin-top: 1rem;
     align-items: start;
   }
-  .stack { display: grid; gap: 1.1rem; }
+  .stack { display: grid; gap: 1rem; }
   .card {
-    background: rgba(255,255,255,.92);
-    border: 1px solid rgba(219, 228, 238, .92);
+    background: var(--surface);
+    border: 1px solid rgba(255,255,255,.80);
     border-radius: var(--radius-lg);
-    padding: 1.15rem;
-    box-shadow: var(--shadow-sm);
+    padding: 1.05rem;
+    box-shadow: var(--shadow);
   }
   .card-header {
     display: flex;
@@ -153,45 +451,59 @@
     gap: 1rem;
     margin-bottom: 1rem;
   }
-  .card-title { display: flex; align-items: center; gap: .7rem; }
+  .card-title { display: flex; align-items: center; gap: .75rem; }
   .step {
-    width: 32px;
-    height: 32px;
-    border-radius: 12px;
+    min-width: 34px;
+    height: 34px;
+    border-radius: 14px;
     display: grid;
     place-items: center;
-    background: var(--green-soft);
+    background: linear-gradient(135deg, #dcfce7, #bbf7d0);
     color: var(--accent-dark);
-    font-weight: 800;
-    font-size: .86rem;
+    font-weight: 950;
+    font-size: .85rem;
   }
-  h3 { margin: 0; font-size: 1.02rem; letter-spacing: -.02em; }
-  .meta { color: var(--muted); font-size: .82rem; margin-top: .12rem; }
+  h3 { margin: 0; font-size: 1.03rem; letter-spacing: -.025em; }
+  .meta { color: var(--muted); font-size: .82rem; margin-top: .14rem; }
 
   .drop {
-    border: 1.5px dashed #a7c7bb;
-    border-radius: 20px;
-    padding: 1.35rem 1rem;
+    position: relative;
+    overflow: hidden;
+    border: 1.5px dashed #9ed7c1;
+    border-radius: 24px;
+    padding: 1.45rem 1rem;
     text-align: center;
-    background: linear-gradient(180deg, rgba(236,253,245,.7), rgba(255,255,255,.9));
-    transition: .18s ease;
+    background: linear-gradient(180deg, rgba(236,253,245,.88), rgba(255,255,255,.94));
     cursor: pointer;
+    transition: transform .18s ease, box-shadow .18s ease, border-color .18s ease;
   }
-  .drop:hover, .drop.dragover { border-color: var(--accent); transform: translateY(-1px); box-shadow: 0 12px 30px rgba(5,150,105,.13); }
-  .drop .upload-icon {
-    width: 54px;
-    height: 54px;
-    border-radius: 18px;
+  .drop::before {
+    content: "";
+    position: absolute;
+    width: 140px;
+    height: 140px;
+    left: -50px;
+    bottom: -60px;
+    border-radius: 50%;
+    background: rgba(16,185,129,.12);
+  }
+  .drop:hover, .drop.dragover { border-color: var(--accent); transform: translateY(-2px); box-shadow: 0 18px 38px rgba(16,185,129,.17); }
+  .upload-icon {
+    position: relative;
+    z-index: 1;
+    width: 62px;
+    height: 62px;
+    border-radius: 22px;
     display: grid;
     place-items: center;
-    margin: 0 auto .75rem;
+    margin: 0 auto .8rem;
     background: white;
     box-shadow: var(--shadow-sm);
-    font-size: 1.5rem;
+    font-size: 1.7rem;
   }
-  .drop p { margin: .18rem 0; color: var(--muted); }
+  .drop p { position: relative; z-index: 1; margin: .18rem 0; color: var(--muted); }
   .drop strong { color: var(--text); }
-  .drop code { background: white; padding: .16rem .36rem; border-radius: 7px; color: var(--accent-dark); }
+  .drop code { background: white; padding: .17rem .38rem; border-radius: 8px; color: var(--accent-dark); }
   .drop input { display: none; }
 
   .input-row { display: grid; grid-template-columns: 1fr auto; gap: .65rem; align-items: center; }
@@ -199,32 +511,16 @@
   input, select {
     width: 100%;
     min-width: 0;
-    padding: .72rem .85rem;
+    padding: .75rem .85rem;
     border: 1px solid var(--border);
-    border-radius: 13px;
+    border-radius: 14px;
     background: white;
     color: var(--text);
     font: inherit;
     outline: none;
     transition: .15s ease;
   }
-  input:focus, select:focus { border-color: var(--accent); box-shadow: 0 0 0 4px rgba(5,150,105,.10); }
-
-  button, .button-like {
-    border: 0;
-    border-radius: 13px;
-    padding: .73rem .95rem;
-    font: inherit;
-    font-weight: 700;
-    cursor: pointer;
-    transition: .15s ease;
-    white-space: nowrap;
-  }
-  .primary { background: var(--accent); color: white; box-shadow: 0 10px 22px rgba(5,150,105,.22); }
-  .primary:hover { background: var(--accent-dark); transform: translateY(-1px); }
-  .ghost { background: white; color: var(--accent-dark); border: 1px solid var(--border); }
-  .ghost:hover { background: var(--green-soft); border-color: #a7f3d0; }
-  .mini-btn { padding: .42rem .58rem; border-radius: 10px; font-size: .76rem; }
+  input:focus, select:focus { border-color: var(--accent); box-shadow: 0 0 0 4px rgba(16,185,129,.12); }
 
   .summary-totals {
     display: grid;
@@ -233,134 +529,196 @@
     margin-bottom: 1rem;
   }
   .total-tile {
-    border-radius: 18px;
+    border-radius: 20px;
     padding: .95rem;
     border: 1px solid var(--border);
-    background: var(--surface);
+    background: white;
+    box-shadow: 0 8px 18px rgba(15,23,42,.04);
   }
-  .total-tile .label { color: var(--muted); font-size: .72rem; text-transform: uppercase; letter-spacing: .06em; }
-  .total-tile .value { font-size: 1.35rem; font-weight: 850; letter-spacing: -.04em; margin-top: .22rem; }
-  .income .value { color: var(--accent); }
+  .total-tile .label { color: var(--muted); font-size: .72rem; text-transform: uppercase; letter-spacing: .06em; font-weight: 850; }
+  .total-tile .value { font-size: 1.4rem; font-weight: 950; letter-spacing: -.05em; margin-top: .22rem; }
+  .income .value { color: var(--accent-dark); }
   .expense .value { color: var(--red); }
   .review .value { color: var(--amber); }
 
-  .chart { display: grid; gap: .55rem; }
-  .bar-row { display: grid; grid-template-columns: 128px 1fr 92px; gap: .6rem; align-items: center; font-size: .85rem; }
-  .bar-row .cat { font-weight: 750; }
-  .bar-row .track { height: 12px; background: #e8eef5; border-radius: 999px; overflow: hidden; }
-  .bar-row .fill { height: 100%; background: linear-gradient(90deg, var(--accent), var(--accent-2)); border-radius: 999px; }
+  .chart { display: grid; gap: .58rem; }
+  .bar-row { display: grid; grid-template-columns: 128px 1fr 92px; gap: .62rem; align-items: center; font-size: .85rem; }
+  .bar-row .cat { font-weight: 850; }
+  .bar-row .track { height: 13px; background: #e8eef5; border-radius: 999px; overflow: hidden; box-shadow: inset 0 1px 2px rgba(0,0,0,.04); }
+  .bar-row .fill { height: 100%; background: linear-gradient(90deg, var(--accent), var(--cyan)); border-radius: 999px; animation: grow .55s ease-out both; transform-origin: left; }
   .bar-row.expense .fill { background: linear-gradient(90deg, #ef4444, #f97316); }
   .bar-row .amt { text-align: right; font-family: ui-monospace, Menlo, monospace; color: var(--muted); font-size: .8rem; }
+  @keyframes grow { from { transform: scaleX(.15); opacity: .35; } to { transform: scaleX(1); opacity: 1; } }
 
-  .table-wrap { overflow: auto; border: 1px solid var(--border); border-radius: 18px; background: white; }
-  table { width: 100%; border-collapse: collapse; min-width: 850px; font-size: .84rem; }
-  th, td { text-align: left; padding: .72rem .78rem; border-bottom: 1px solid #edf2f7; vertical-align: top; }
-  th { position: sticky; top: 0; z-index: 1; background: #f8fafc; color: var(--muted); font-weight: 800; font-size: .72rem; text-transform: uppercase; letter-spacing: .04em; }
+  .table-wrap { overflow: auto; border: 1px solid var(--border); border-radius: 20px; background: white; box-shadow: inset 0 1px 0 rgba(255,255,255,.85); }
+  table { width: 100%; border-collapse: collapse; min-width: 900px; font-size: .84rem; }
+  th, td { text-align: left; padding: .76rem .8rem; border-bottom: 1px solid #edf2f7; vertical-align: top; }
+  th { position: sticky; top: 0; z-index: 1; background: #f8fafc; color: var(--muted); font-weight: 950; font-size: .72rem; text-transform: uppercase; letter-spacing: .045em; }
   tr:last-child td { border-bottom: 0; }
   tr:hover td { background: #fbfefd; }
-  td.amt { text-align: right; font-family: ui-monospace, Menlo, monospace; font-weight: 800; }
+  td.amt { text-align: right; font-family: ui-monospace, Menlo, monospace; font-weight: 950; }
   td.amt.neg { color: var(--red); }
-  td.amt.pos { color: var(--accent); }
+  td.amt.pos { color: var(--accent-dark); }
 
   .cat-pill, .conf-pill, .review-pill {
     display: inline-flex;
     align-items: center;
     gap: .25rem;
     border-radius: 999px;
-    padding: .21rem .55rem;
+    padding: .23rem .58rem;
     font-size: .72rem;
-    font-weight: 800;
+    font-weight: 900;
   }
   .cat-pill { background: var(--green-soft); color: var(--accent-dark); }
   .conf-pill.high { background: #dcfce7; color: #166534; }
   .conf-pill.medium { background: var(--amber-soft); color: #92400e; }
   .conf-pill.low { background: var(--red-soft); color: #991b1b; }
-  .review-pill { background: var(--amber-soft); color: #92400e; margin-top: .25rem; }
-  .reason { color: var(--muted); font-size: .76rem; line-height: 1.4; }
+  .review-pill { background: var(--amber-soft); color: #92400e; margin-top: .3rem; }
+  .reason { color: var(--muted); font-size: .76rem; line-height: 1.42; }
 
   .alert-card {
-    border-radius: 18px;
+    border-radius: 20px;
     border: 1px solid var(--border);
     padding: .9rem;
-    background: var(--surface);
+    background: white;
     display: grid;
     gap: .5rem;
+    box-shadow: 0 8px 18px rgba(15,23,42,.04);
   }
   .alert-card.exceeded { border-color: #fecaca; background: linear-gradient(180deg, #fff7f7, white); }
   .alert-card.ok { border-color: #bbf7d0; background: linear-gradient(180deg, #f0fdf4, white); }
 
   .empty {
-    border-radius: 18px;
+    border-radius: 20px;
     padding: 1.25rem;
     color: var(--muted);
     background: #f8fafc;
     text-align: center;
     border: 1px dashed var(--border);
   }
+  .empty-illustration { font-size: 2rem; margin-bottom: .35rem; }
   .muted { color: var(--muted); }
   .small { font-size: .8rem; }
-  .spinner { display: inline-block; width: 14px; height: 14px; border: 2px solid rgba(5,150,105,.18); border-top-color: var(--accent); border-radius: 50%; animation: spin .8s linear infinite; vertical-align: middle; }
+  .spinner { display: inline-block; width: 14px; height: 14px; border: 2px solid rgba(16,185,129,.18); border-top-color: var(--accent); border-radius: 50%; animation: spin .8s linear infinite; vertical-align: middle; }
   @keyframes spin { to { transform: rotate(360deg); } }
 
   .toasts { position: fixed; top: 1rem; right: 1rem; z-index: 999; display: grid; gap: .55rem; }
-  .toast { background: white; border: 1px solid var(--border); border-left: 4px solid var(--accent); border-radius: 14px; padding: .8rem 1rem; box-shadow: var(--shadow); min-width: 230px; max-width: 360px; font-size: .88rem; animation: slidein .24s ease-out; }
-  .toast.success { border-left-color: var(--success); }
+  .toast { background: white; border: 1px solid var(--border); border-left: 4px solid var(--accent); border-radius: 16px; padding: .82rem 1rem; box-shadow: var(--shadow); min-width: 240px; max-width: 380px; font-size: .88rem; animation: slidein .24s ease-out; }
+  .toast.success { border-left-color: var(--accent); }
   .toast.error { border-left-color: var(--red); }
   .toast.warn { border-left-color: var(--amber); }
   @keyframes slidein { from { transform: translateX(110%); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
 
   details { margin-top: 1.1rem; font-size: .86rem; }
   details > summary { cursor: pointer; color: var(--muted); padding: .65rem .2rem; }
-  details pre { background: #0f172a; color: #e2e8f0; padding: 1rem; border-radius: 18px; font-size: .78rem; overflow: auto; max-height: 280px; font-family: ui-monospace, Menlo, monospace; }
+  details pre { background: #0f172a; color: #e2e8f0; padding: 1rem; border-radius: 20px; font-size: .78rem; overflow: auto; max-height: 300px; font-family: ui-monospace, Menlo, monospace; }
 
-  @media (max-width: 930px) {
-    .hero-content, .dashboard { grid-template-columns: 1fr; }
-    .quick-stats, .summary-totals { grid-template-columns: repeat(2, 1fr); }
-    .input-row, .input-row.multi { grid-template-columns: 1fr; }
+  @media (max-width: 1040px) {
+    .hero-grid, .dashboard { grid-template-columns: 1fr; }
+    .insight-panel { min-height: 410px; }
+    .kpi-grid, .summary-totals { grid-template-columns: repeat(2, 1fr); }
   }
-  @media (max-width: 560px) {
+  @media (max-width: 680px) {
     .app-shell { padding: .85rem .75rem 2rem; }
-    .hero { border-radius: 22px; padding: 1rem; }
-    .quick-stats, .summary-totals { grid-template-columns: 1fr; }
-    .bar-row { grid-template-columns: 96px 1fr 76px; }
+    .nav { align-items: flex-start; flex-direction: column; }
+    .hero { border-radius: 24px; padding: .9rem; }
+    .hero-copy { padding: .7rem .55rem; }
+    .hero h2 { font-size: 2.35rem; }
+    .mini-visuals, .kpi-grid, .summary-totals { grid-template-columns: 1fr; }
+    .finance-card { position: relative; left: auto; right: auto; bottom: auto; margin-top: .8rem; }
+    .insight-panel { min-height: auto; }
+    .input-row, .input-row.multi { grid-template-columns: 1fr !important; }
+    .card-header { flex-direction: column; }
+    .bar-row { grid-template-columns: 94px 1fr 74px; }
   }
 </style>
 </head>
 <body>
+<div class="orb one"></div>
+<div class="orb two"></div>
+<div class="orb three"></div>
+
 <div class="app-shell">
-  <section class="hero">
-    <div class="hero-content">
+  <nav class="nav">
+    <div class="brand">
+      <div class="logo">💰</div>
       <div>
-        <div class="brand-row">
-          <div class="logo">💰</div>
-          <div>
-            <h1>BudgetBot</h1>
-            <p>AI Money Coach for monthly bank statements</p>
-          </div>
-        </div>
-        <h2>Understand where your money went.</h2>
-        <p class="hero-subtitle">Upload a CSV statement, let AI categorize transactions, then review uncertain rows and set category spending caps.</p>
-        <div class="hero-actions">
-          <button class="primary" onclick="document.getElementById('file').click()">Upload CSV</button>
-          <button class="ghost" onclick="summary(); loadTxns(); loadReview();">Refresh dashboard</button>
-        </div>
+        <h1>BudgetBot</h1>
+        <p>AI Money Coach · Domain B FinTech</p>
       </div>
-      <div class="status-card">
-        <div class="title">Runtime status</div>
-        <div class="status-pills" id="status-pills">
+    </div>
+    <div class="nav-actions">
+      <span class="chip">⚡ 48h Hackathon</span>
+      <span class="chip">🔒 Personal finance demo</span>
+      <span class="chip">🤖 Bedrock ready</span>
+    </div>
+  </nav>
+
+  <section class="hero">
+    <div class="hero-grid">
+      <div class="hero-copy">
+        <span class="eyebrow"><span class="pulse-dot"></span> Live AI spending intelligence</span>
+        <h2>Turn messy bank CSVs into <span class="gradient-text">clear money insights.</span></h2>
+        <p class="hero-subtitle">Upload a statement, classify transactions with confidence scoring, review ambiguous rows, and catch category overspending before it surprises you.</p>
+        <div class="hero-actions">
+          <button class="button primary" onclick="document.getElementById('file').click()">Upload statement</button>
+          <button class="button ghost" onclick="summary(); loadTxns(); loadReview();">Refresh dashboard</button>
+        </div>
+        <div class="status-row" id="status-pills">
           <span class="pill"><span class="spinner"></span> loading...</span>
         </div>
-        <p class="small" style="margin:.9rem 0 0; opacity:.82;">Demo focus: confidence scoring, review queue, budget cap alert.</p>
       </div>
+
+      <aside class="insight-panel" aria-label="AI insight preview">
+        <div class="panel-top">
+          <div>
+            <div class="panel-title">AI Insight Preview</div>
+            <div class="meta">Personal spending snapshot</div>
+          </div>
+          <span class="ai-badge">✨ Confidence aware</span>
+        </div>
+        <div class="mini-visuals">
+          <div class="donut-card">
+            <div class="donut"></div>
+            <div class="legend">
+              <div class="legend-row"><span><i class="dot food"></i>Food</span><strong>42%</strong></div>
+              <div class="legend-row"><span><i class="dot transport"></i>Transport</span><strong>21%</strong></div>
+              <div class="legend-row"><span><i class="dot sub"></i>Subscriptions</span><strong>17%</strong></div>
+              <div class="legend-row"><span><i class="dot review"></i>Need review</span><strong id="preview-review">0</strong></div>
+            </div>
+          </div>
+          <div class="ai-card">
+            <div class="insight-line">
+              <div><strong>Top driver</strong><div class="meta">Food and delivery</div></div>
+              <div class="score-ring" data-label="92" style="--score:92"></div>
+            </div>
+            <div class="insight-line">
+              <div><strong>Ambiguous</strong><div class="meta">GRAB / VINMART / FT code</div></div>
+              <div class="score-ring" data-label="64" style="--score:64"></div>
+            </div>
+            <div class="insight-line">
+              <div><strong>Subscriptions</strong><div class="meta">Netflix, iCloud, Spotify</div></div>
+              <div class="score-ring" data-label="88" style="--score:88"></div>
+            </div>
+          </div>
+        </div>
+        <div class="finance-card">
+          <div>
+            <div class="meta" style="color:rgba(255,255,255,.72);">Demo account</div>
+            <strong>Minh · Office Worker</strong>
+            <div class="card-number">CSV • Grab • ShopeeFood • Netflix • VNPT</div>
+          </div>
+          <div style="font-size:1.7rem;">📈</div>
+        </div>
+      </aside>
     </div>
   </section>
 
-  <!-- ĐÃ SỬA: thêm KPI cards ở đầu trang để giao diện giống dashboard thật hơn. -->
-  <section class="quick-stats">
-    <div class="stat-card"><div class="label">Rows inserted</div><div class="value" id="kpi-rows">0</div><div class="hint">After upload</div></div>
-    <div class="stat-card"><div class="label">Need review</div><div class="value" id="kpi-review">0</div><div class="hint">Ambiguous rows</div></div>
-    <div class="stat-card"><div class="label">Month</div><div class="value" id="kpi-month">2026-05</div><div class="hint">Current filter</div></div>
-    <div class="stat-card"><div class="label">Alerts</div><div class="value" id="kpi-alerts">0</div><div class="hint">Budget status</div></div>
+  <section class="kpi-grid">
+    <div class="kpi"><div class="kpi-icon">📥</div><div class="label">Rows inserted</div><div class="value" id="kpi-rows">0</div><div class="hint">Parsed from statement</div></div>
+    <div class="kpi"><div class="kpi-icon">⚠️</div><div class="label">Need review</div><div class="value" id="kpi-review">0</div><div class="hint">Low-confidence rows</div></div>
+    <div class="kpi"><div class="kpi-icon">📅</div><div class="label">Month filter</div><div class="value" id="kpi-month">2026-05</div><div class="hint">Current dashboard</div></div>
+    <div class="kpi"><div class="kpi-icon">🚨</div><div class="label">Exceeded alerts</div><div class="value" id="kpi-alerts">0</div><div class="hint">Budget cap status</div></div>
   </section>
 
   <section class="dashboard">
@@ -369,12 +727,12 @@
         <div class="card-header">
           <div class="card-title">
             <span class="step">1</span>
-            <div><h3>Upload statement</h3><div class="meta">CSV format: date, description, amount</div></div>
+            <div><h3>Upload statement</h3><div class="meta">CSV: date, description, amount</div></div>
           </div>
         </div>
         <label class="drop" id="drop">
           <div class="upload-icon">📄</div>
-          <p><strong>Drag a CSV here</strong> or <span style="color:var(--accent);font-weight:800;">click to browse</span></p>
+          <p><strong>Drag your CSV here</strong> or <span style="color:var(--accent-dark);font-weight:950;">click to browse</span></p>
           <p class="small">Try <code>sample_data/bank_statement_q2_2026.csv</code></p>
           <input type="file" id="file" accept=".csv,.txt">
         </label>
@@ -385,7 +743,7 @@
         <div class="card-header">
           <div class="card-title">
             <span class="step">2</span>
-            <div><h3>Budget cap alert</h3><div class="meta">Set a monthly limit for a category</div></div>
+            <div><h3>Budget cap alert</h3><div class="meta">Set monthly caps and catch overspending</div></div>
           </div>
         </div>
         <div class="input-row multi">
@@ -395,10 +753,10 @@
             <option>Utilities</option><option>Entertainment</option><option>Health</option>
           </select>
           <input type="number" id="cap-amount" value="2000000" min="1">
-          <button class="primary" onclick="setCap()">Set cap</button>
-          <button class="ghost" onclick="loadAlerts()">Check</button>
+          <button class="button primary" onclick="setCap()">Set cap</button>
+          <button class="button soft" onclick="loadAlerts()">Check</button>
         </div>
-        <div id="alerts-out" style="margin-top:1rem;"><div class="empty">Set a cap, then check alerts.</div></div>
+        <div id="alerts-out" style="margin-top:1rem;"><div class="empty"><div class="empty-illustration">🚨</div>Set a cap, then check alerts.</div></div>
       </section>
     </div>
 
@@ -411,34 +769,34 @@
           </div>
           <div class="input-row" style="grid-template-columns: 170px auto auto; width:auto;">
             <input type="month" id="month" value="2026-05" onchange="syncMonthKpi()">
-            <button class="primary" id="sum-btn" onclick="summary()">Summary</button>
-            <button class="ghost" onclick="loadReview()">Review</button>
+            <button class="button primary" id="sum-btn" onclick="summary()">Summary</button>
+            <button class="button soft" onclick="loadReview()">Review</button>
           </div>
         </div>
-        <div id="summary-out"><div class="empty">Upload a statement, then run summary.</div></div>
+        <div id="summary-out"><div class="empty"><div class="empty-illustration">📊</div>Upload a statement, then run summary.</div></div>
       </section>
 
       <section class="card">
         <div class="card-header">
           <div class="card-title">
             <span class="step">4</span>
-            <div><h3>Review queue</h3><div class="meta">Low-confidence or ambiguous transactions</div></div>
+            <div><h3>Review queue</h3><div class="meta">Human-in-the-loop for uncertain transactions</div></div>
           </div>
         </div>
-        <div id="review-out"><div class="empty">Click Review after uploading.</div></div>
+        <div id="review-out"><div class="empty"><div class="empty-illustration">🔎</div>Click Review after uploading.</div></div>
       </section>
     </div>
   </section>
 
-  <section class="card" style="margin-top:1.1rem;">
+  <section class="card" style="margin-top:1rem;">
     <div class="card-header">
       <div class="card-title">
         <span class="step">5</span>
-        <div><h3>All transactions</h3><div class="meta">Includes category, confidence, reason, and amount</div></div>
+        <div><h3>All transactions</h3><div class="meta">Category, confidence, reason, amount</div></div>
       </div>
-      <button class="ghost" onclick="loadTxns()">Refresh table</button>
+      <button class="button soft" onclick="loadTxns()">Refresh table</button>
     </div>
-    <div id="txns-out"><div class="empty">No transactions yet.</div></div>
+    <div id="txns-out"><div class="empty"><div class="empty-illustration">🧾</div>No transactions yet.</div></div>
   </section>
 
   <details>
@@ -484,6 +842,10 @@ function logDebug(label, data) {
   $('debug-log').textContent = `── ${new Date().toLocaleTimeString()} — ${label} ──\n${JSON.stringify(data, null, 2)}\n\n${old}`.slice(0, 5000);
 }
 function syncMonthKpi() { $('kpi-month').textContent = $('month').value || 'All'; }
+function setReviewKpi(count) {
+  $('kpi-review').textContent = count || 0;
+  $('preview-review').textContent = count || 0;
+}
 
 async function call(path, opts={}) {
   opts.headers = Object.assign({'X-User-Id': USER_ID}, opts.headers || {});
@@ -502,7 +864,6 @@ async function loadStatus() {
     .join('');
 }
 
-// ---------- Upload ----------
 const drop = $('drop'), fileInput = $('file');
 drop.addEventListener('dragover', e => { e.preventDefault(); drop.classList.add('dragover'); });
 drop.addEventListener('dragleave', () => drop.classList.remove('dragover'));
@@ -523,10 +884,13 @@ async function doUpload(file) {
   }
   const b = res.body;
   $('kpi-rows').textContent = b.rows_inserted || 0;
-  $('kpi-review').textContent = b.review_count || 0;
+  setReviewKpi(b.review_count || 0);
   $('upload-result').innerHTML = `
     <div class="alert-card ok">
-      <strong>Upload complete</strong>
+      <div style="display:flex;justify-content:space-between;gap:.8rem;align-items:center;">
+        <strong>Upload complete</strong>
+        <span class="conf-pill high">classified</span>
+      </div>
       <span class="muted small">${escapeHtml(b.filename)} · ${b.rows_inserted} of ${b.rows_parsed} rows categorized</span>
       <span class="muted small">Review needed: ${b.review_count || 0} · Low confidence: ${b.low_confidence_count || 0}</span>
     </div>`;
@@ -536,7 +900,6 @@ async function doUpload(file) {
   await loadReview();
 }
 
-// ---------- Summary ----------
 async function summary() {
   syncMonthKpi();
   const m = $('month').value.trim();
@@ -546,7 +909,7 @@ async function summary() {
   if (!res.ok) { $('summary-out').innerHTML = `<div class="empty" style="color:var(--red);">${escapeHtml(res.body.detail || 'Error')}</div>`; return; }
   const {by_category, top_3_drivers} = res.body;
   if (!by_category || !Object.keys(by_category).length) {
-    $('summary-out').innerHTML = '<div class="empty">No data for this month.</div>';
+    $('summary-out').innerHTML = '<div class="empty"><div class="empty-illustration">📊</div>No data for this month.</div>';
     return;
   }
   const incomes = Object.entries(by_category).filter(([, v]) => v.total > 0);
@@ -555,7 +918,7 @@ async function summary() {
   const expenseTotal = expenses.reduce((s, [, v]) => s + Math.abs(v.total), 0);
   const reviewTotal = Object.values(by_category).reduce((s, v) => s + (v.review_count || 0), 0);
   const net = incomeTotal - expenseTotal;
-  $('kpi-review').textContent = reviewTotal;
+  setReviewKpi(reviewTotal);
   const maxBar = Math.max(...Object.values(by_category).map(v => Math.abs(v.total)), 1);
   const sorted = [...expenses.sort((a, b) => a[1].total - b[1].total), ...incomes.sort((a, b) => b[1].total - a[1].total)];
 
@@ -563,7 +926,7 @@ async function summary() {
     <div class="summary-totals">
       <div class="total-tile income"><div class="label">Income</div><div class="value">${fmtCompact(incomeTotal)}</div></div>
       <div class="total-tile expense"><div class="label">Expenses</div><div class="value">${fmtCompact(expenseTotal)}</div></div>
-      <div class="total-tile net"><div class="label">Net</div><div class="value" style="color:${net >= 0 ? 'var(--accent)' : 'var(--red)'};">${net >= 0 ? '+' : ''}${fmtCompact(net)}</div></div>
+      <div class="total-tile net"><div class="label">Net</div><div class="value" style="color:${net >= 0 ? 'var(--accent-dark)' : 'var(--red)'};">${net >= 0 ? '+' : ''}${fmtCompact(net)}</div></div>
       <div class="total-tile review"><div class="label">Need review</div><div class="value">${reviewTotal}</div></div>
     </div>
     <div class="chart">
@@ -583,7 +946,7 @@ async function summary() {
 }
 
 function renderTransactions(rows, opts={}) {
-  if (!rows || !rows.length) return '<div class="empty">No transactions found.</div>';
+  if (!rows || !rows.length) return '<div class="empty"><div class="empty-illustration">✅</div>No transactions found.</div>';
   const showCorrect = opts.showCorrect;
   return `
     <div class="table-wrap">
@@ -598,7 +961,7 @@ function renderTransactions(rows, opts={}) {
               <td><span class="conf-pill ${escapeHtml(r.confidence || 'medium')}">${escapeHtml(r.confidence || '')} · ${Math.round((r.confidence_score || 0) * 100)}%</span></td>
               <td><div class="reason">${escapeHtml(r.reason || '')}<br>${r.suggested_categories && r.suggested_categories.length ? 'Suggested: ' + escapeHtml(r.suggested_categories.join(', ')) : ''}</div></td>
               <td class="amt ${r.amount < 0 ? 'neg' : 'pos'}">${r.amount >= 0 ? '+' : ''}${fmt(r.amount)}</td>
-              ${showCorrect ? `<td><button class="ghost mini-btn" onclick="correctTxn('${escapeHtml(r.transaction_id)}')">Mark Other</button></td>` : ''}
+              ${showCorrect ? `<td><button class="button soft small" onclick="correctTxn('${escapeHtml(r.transaction_id)}')">Mark Other</button></td>` : ''}
             </tr>
           `).join('')}
         </tbody>
@@ -614,7 +977,7 @@ async function loadTxns() {
   const url = '/transactions' + (m ? '?month=' + encodeURIComponent(m) : '');
   const res = await call(url);
   if (!res.ok || !res.body.transactions || !res.body.transactions.length) {
-    $('txns-out').innerHTML = '<div class="empty">No transactions yet.</div>';
+    $('txns-out').innerHTML = '<div class="empty"><div class="empty-illustration">🧾</div>No transactions yet.</div>';
     return;
   }
   $('txns-out').innerHTML = renderTransactions(res.body.transactions);
@@ -626,8 +989,8 @@ async function loadReview() {
   const url = '/review' + (m ? '?month=' + encodeURIComponent(m) : '');
   const res = await call(url);
   if (!res.ok) { $('review-out').innerHTML = `<div class="empty" style="color:var(--red);">${escapeHtml(res.body.detail || 'Error')}</div>`; return; }
-  $('kpi-review').textContent = res.body.count || 0;
-  $('review-out').innerHTML = `<p class="muted small" style="margin-top:0;">${res.body.count || 0} transaction(s) need review.</p>` + renderTransactions(res.body.transactions, {showCorrect: true});
+  setReviewKpi(res.body.count || 0);
+  $('review-out').innerHTML = `<p class="muted small" style="margin-top:0;">${res.body.count || 0} transaction(s) need human review.</p>` + renderTransactions(res.body.transactions, {showCorrect: true});
 }
 
 async function correctTxn(transactionId) {
@@ -663,7 +1026,7 @@ async function loadAlerts() {
   if (!res.ok) { $('alerts-out').innerHTML = `<div class="empty" style="color:var(--red);">${escapeHtml(res.body.detail || 'Error')}</div>`; return; }
   const alerts = res.body.alerts || [];
   $('kpi-alerts').textContent = alerts.filter(a => a.status === 'exceeded').length;
-  if (!alerts.length) { $('alerts-out').innerHTML = '<div class="empty">No caps saved for this month.</div>'; return; }
+  if (!alerts.length) { $('alerts-out').innerHTML = '<div class="empty"><div class="empty-illustration">🚨</div>No caps saved for this month.</div>'; return; }
   $('alerts-out').innerHTML = `<div class="stack" style="gap:.65rem;">
     ${alerts.map(a => `
       <div class="alert-card ${a.status === 'exceeded' ? 'exceeded' : 'ok'}">
