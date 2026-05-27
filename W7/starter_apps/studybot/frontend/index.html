@@ -161,6 +161,14 @@
   }
   button.ghost:hover { background: var(--accent-light); border-color: var(--accent); }
 
+  /* ĐÃ SỬA: thêm class cho hàng nút nhanh Summary/Quiz để local demo dễ hơn. */
+  .quick-actions {
+    display: flex;
+    gap: 0.6rem;
+    flex-wrap: wrap;
+    margin-top: 0.75rem;
+  }
+
   /* ---------- Result blocks ---------- */
   .answer-card {
     margin-top: 1rem;
@@ -190,7 +198,7 @@
     background: var(--accent-light); color: var(--accent-dark);
     padding: 0.1rem 0.45rem; border-radius: 100px; font-weight: 500;
   }
-  .citation .body { color: var(--text); line-height: 1.5; }
+  .citation .body { color: var(--text); line-height: 1.5; white-space: pre-wrap; }
 
   /* ---------- Doc list ---------- */
   .doc-list { display: grid; gap: 0.5rem; }
@@ -307,6 +315,13 @@
       <input type="text" id="question" placeholder="e.g. What is photosynthesis?" autocomplete="off">
       <button class="primary" id="ask-btn" onclick="ask()">Ask</button>
     </div>
+
+    <!-- ĐÃ SỬA: thêm 2 nút nhanh để demo Summary và Quiz mà không cần thêm backend endpoint mới. -->
+    <div class="quick-actions">
+      <button class="ghost" onclick="summary()">Generate Summary</button>
+      <button class="ghost" onclick="quiz()">Generate Quiz</button>
+    </div>
+
     <div class="answer-card" id="answer-card">
       <div class="answer-text" id="answer-text"></div>
       <div class="citations" id="citations"></div>
@@ -360,6 +375,34 @@ function logDebug(label, data) {
   $('debug-log').textContent = lines.slice(0, 6).join('\n');
 }
 
+// ĐÃ SỬA: thêm hàm escapeHtml để citation hiển thị an toàn, tránh lỗi khi text/source có ký tự HTML.
+function escapeHtml(value) {
+  return String(value || '')
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#039;');
+}
+
+// ĐÃ SỬA: render citation hỗ trợ cả local citation {chunk, score, text}
+// và Bedrock citation {text, source}; tránh lỗi "chunk undefined" khi deploy AWS.
+function renderCitation(citation, index) {
+  const label = citation.chunk ? `chunk ${citation.chunk}` : `source ${index + 1}`;
+  const score = citation.score !== undefined ? `score ${(citation.score || 0).toFixed(1)}` : '';
+  const body = citation.text || JSON.stringify(citation.source || citation.metadata || {}, null, 2);
+
+  return `
+    <div class="citation">
+      <div class="head">
+        <span>${escapeHtml(label)}</span>
+        ${score ? `<span class="score">${escapeHtml(score)}</span>` : ''}
+      </div>
+      <div class="body">${escapeHtml(body)}</div>
+    </div>
+  `;
+}
+
 async function call(path, opts = {}) {
   opts.headers = Object.assign({'X-User-Id': USER_ID}, opts.headers || {});
   const r = await fetch(API_BASE + path, opts);
@@ -400,20 +443,20 @@ drop.addEventListener('drop', e => {
 fileInput.addEventListener('change', e => { if (e.target.files[0]) doUpload(e.target.files[0]); });
 
 async function doUpload(file) {
-  $('upload-result').innerHTML = `<p class="muted" style="margin:0.8rem 0 0;"><span class="spinner"></span> Uploading ${file.name} (${(file.size/1024).toFixed(1)} KB)…</p>`;
+  $('upload-result').innerHTML = `<p class="muted" style="margin:0.8rem 0 0;"><span class="spinner"></span> Uploading ${escapeHtml(file.name)} (${(file.size/1024).toFixed(1)} KB)…</p>`;
   const fd = new FormData();
   fd.append('file', file);
   const res = await call('/upload', {method: 'POST', body: fd});
   if (!res.ok) {
     toast(`Upload failed: ${res.body.detail || res.status}`, 'error');
-    $('upload-result').innerHTML = `<p style="color:var(--error); margin:0.8rem 0 0;">${res.body.detail || 'Upload failed'}</p>`;
+    $('upload-result').innerHTML = `<p style="color:var(--error); margin:0.8rem 0 0;">${escapeHtml(res.body.detail || 'Upload failed')}</p>`;
     return;
   }
   const b = res.body;
   $('upload-result').innerHTML = `
     <div style="margin-top:0.8rem; padding:0.8rem; background:#f0fdf4; border-radius:var(--radius-sm); border-left:3px solid var(--success); font-size:0.88rem;">
-      ✓ <strong>${b.filename}</strong> — ${b.chars_extracted.toLocaleString()} chars extracted &amp; indexed
-      <div style="font-family:ui-monospace,Menlo,monospace; color:var(--muted); font-size:0.74rem; margin-top:0.25rem;">doc_id: ${b.doc_id}</div>
+      ✓ <strong>${escapeHtml(b.filename)}</strong> — ${(b.chars_extracted || 0).toLocaleString()} chars extracted &amp; indexed
+      <div style="font-family:ui-monospace,Menlo,monospace; color:var(--muted); font-size:0.74rem; margin-top:0.25rem;">doc_id: ${escapeHtml(b.doc_id)}</div>
     </div>`;
   toast(`Uploaded ${b.filename}`, 'success');
   refresh();
@@ -436,25 +479,41 @@ async function ask() {
   });
   $('ask-btn').disabled = false;
   if (!res.ok) {
-    $('answer-text').innerHTML = `<span style="color:var(--error);">${res.body.detail || 'Error'}</span>`;
+    $('answer-text').innerHTML = `<span style="color:var(--error);">${escapeHtml(res.body.detail || 'Error')}</span>`;
     return;
   }
   $('answer-text').textContent = res.body.answer;
   const c = res.body.citations || [];
   if (c.length) {
     $('citations').innerHTML = '<div class="muted" style="font-size:0.78rem; margin-top:0.6rem;">📎 Citations from your documents:</div>' +
-      c.map(x => `
-        <div class="citation">
-          <div class="head">
-            <span>chunk ${x.chunk}</span>
-            <span class="score">score ${(x.score || 0).toFixed(1)}</span>
-          </div>
-          <div class="body">${(x.text || '').replace(/</g, '&lt;')}</div>
-        </div>
-      `).join('');
+      c.map((x, i) => renderCitation(x, i)).join('');
   } else {
     $('citations').innerHTML = '<div class="muted" style="font-size:0.82rem; margin-top:0.6rem;">No citations matched. Try a question closer to your uploaded content.</div>';
   }
+}
+
+// ĐÃ SỬA: thêm prompt Summary dùng lại endpoint /query, nên chạy local không cần sửa backend.
+async function summary() {
+  $('question').value = `Create a one-page study guide from my uploaded lecture notes.
+Include:
+1. Overview
+2. 5 key concepts
+3. Key definitions
+4. 3 review questions
+Cite the sources used.`;
+  await ask();
+}
+
+// ĐÃ SỬA: thêm prompt Quiz dùng lại endpoint /query, phù hợp demo Domain 1 EduTech.
+async function quiz() {
+  $('question').value = `Generate 5 multiple-choice quiz questions from my uploaded lecture notes.
+For each question include:
+- question
+- 4 options
+- correct answer
+- short explanation
+- citation/source.`;
+  await ask();
 }
 
 $('question').addEventListener('keydown', e => { if (e.key === 'Enter') ask(); });
@@ -471,10 +530,10 @@ async function refresh() {
   $('docs').innerHTML = res.body.docs.map(d => `
     <div class="doc-item">
       <div>
-        <div class="name">${d.filename || d.doc_id}</div>
+        <div class="name">${escapeHtml(d.filename || d.doc_id)}</div>
         <div class="meta">${(d.chars || 0).toLocaleString()} chars · ${(d.size || 0).toLocaleString()} bytes</div>
       </div>
-      <div class="meta">${(d.doc_id || '').slice(0, 8)}…</div>
+      <div class="meta">${escapeHtml((d.doc_id || '').slice(0, 8))}…</div>
     </div>
   `).join('');
 }
